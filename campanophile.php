@@ -71,10 +71,10 @@ class Campanophile {
         http_build_query($params + $defaults));
     curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
     $results_html = curl_exec($curl);
-    return $this->parse_results_table($results_html);
+    return $this->parse_search_results($results_html);
   }
 
-  private function parse_results_table($html) {
+  private function parse_search_results($html) {
     $dom = new DOMDocument();
     $dom->loadHTML($html);
     $rows = $dom->getElementsByTagName('tr');
@@ -92,12 +92,10 @@ class Campanophile {
       $p->campano_id = $loc[1];
 
       // Second cell, locational details
-      // Location (Dedication), County
-      $loc = $node->firstChild->nextSibling->textContent;
-      preg_match('/^(.*) \((.*)\), (.*)$/', $loc, $matches);
-      $p->location = $matches[1];
-      $p->dedication = $matches[2];
-      $p->county = $matches[3];
+      $matches = $this->parse_location($node->firstChild->nextSibling->textContent);
+      foreach(array('location', 'dedication', 'county') as $field) {
+        $p->$field = $matches[$field];
+      }
 
       // Third cell, method details
       // 1234 Funny Principle Major
@@ -109,10 +107,18 @@ class Campanophile {
 
     return $performances;
   }
+
+  private function parse_location($str) {
+    // Location (Dedication), County
+    preg_match(
+      '/^(?P<location>.*?)(?: \((?<dedication>.*)\))?(?:, (?<county>[^,]*))?$/',
+      $str, $matches);
+    return $matches + array('location' => '', 'dedication' => '', 'county' => '');
+  }
+
 }
 
-$c = new Campanophile('u_5Cy8dzS0uoDV23z0Bejg');
-print_r($c);
+$c = new Campanophile();
 
-print_r($c->search(array('StartDate' => '23/05/2010', 'FinalDate' => '23/05/2010')));
+print_r($c->search(array('StartDate' => '26/05/2010', 'FinalDate' => '26/05/2010', 'Method' => 'Plain Bob Major')));
 
