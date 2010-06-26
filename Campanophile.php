@@ -28,26 +28,13 @@ class Campanophile {
     // Singleton class
     static $instance = null;
     if(!$instance) $instance = new self($session);
+
     return $instance;
   }
 
-  private function get_page($name) {
-    return file_get_contents($this->gen_url($name));
-  }
-
-  private function begin_session() {
-    $homepage = file_get_contents(self::CBASE . 'default.aspx');
-    if(preg_match('/"menu.aspx\?([^\"]*)"/', $homepage, $matches)) {
-      $this->session_key = $matches[1];
-      return true;
-    }
-    return false; // Should probably try catching the error
-  }
-
-  private function test_session() {
-    $menu = $this->get_page('menu');
-    return strpos($menu, 'expired') === FALSE; // Since can return 0
-  }
+  /***
+   * Public methods
+   ***/
 
   public function search($params = array()) {
     /***
@@ -82,6 +69,40 @@ class Campanophile {
     $results_html = curl_exec($curl);
     return $this->parse_search_results($results_html);
   }
+
+  /***
+   * Helper functions
+   ***/
+  
+  //
+  // Site access
+  //
+
+  private function gen_url($name, $suff='') {
+    return self::CBASE . $name . '.aspx?' . $this->session_key . $suff;
+  }
+
+  private function get_page($name, $suff='') {
+    return file_get_contents($this->gen_url($name, $suff));
+  }
+
+  private function begin_session() {
+    $homepage = file_get_contents(self::CBASE . 'default.aspx');
+    if(preg_match('/"menu.aspx\?([^\"]*)"/', $homepage, $matches)) {
+      $this->session_key = $matches[1];
+      return true;
+    }
+    return false; // Should probably try catching the error
+  }
+
+  private function test_session() {
+    $menu = $this->get_page('menu');
+    return strpos($menu, 'expired') === FALSE; // Since can return 0
+  }
+
+  // 
+  // Page parsing
+  //
 
   private function parse_search_results($html) {
     $dom = new DOMDocument();
@@ -131,4 +152,5 @@ class Campanophile {
 $c = Campanophile::getInstance();
 
 print_r($c->search(array('StartDate' => '26/05/2010', 'FinalDate' => '26/05/2010', 'Method' => 'Plain Bob Major')));
+?>
 
