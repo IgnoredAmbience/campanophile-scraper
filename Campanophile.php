@@ -1,11 +1,15 @@
 <?php
-require_once('performance.php');
+require_once('Performance.php');
 
 class Campanophile {
   const CBASE = 'http://www.campanophile.com/';
   private $session_key = '';
 
-  function __construct($session = '') {
+  /***
+   * Constructors
+   ***/
+
+  private function __construct($session) {
     if(!$session) {
       $this->begin_session();
     } else {
@@ -18,8 +22,13 @@ class Campanophile {
     }
   }
 
-  private function gen_url($name) {
-    return self::CBASE . $name . '.aspx?' . $this->session_key;
+  private function __clone() {}
+
+  public function getInstance($session = '') {
+    // Singleton class
+    static $instance = null;
+    if(!$instance) $instance = new self($session);
+    return $instance;
   }
 
   private function get_page($name) {
@@ -119,7 +128,7 @@ class Campanophile {
 
 }
 
-$c = new Campanophile();
+$c = Campanophile::getInstance();
 
 print_r($c->search(array('StartDate' => '26/05/2010', 'FinalDate' => '26/05/2010', 'Method' => 'Plain Bob Major')));
 
