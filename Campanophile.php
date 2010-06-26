@@ -70,6 +70,18 @@ class Campanophile {
     return $this->parse_search_results($results_html);
   }
 
+  public function get_performance($campano_id, $perf = null) {
+    /***
+     * Returns Performance object of specific Campanophile (Quarter) Peal
+     * specified by given reference number, $campano_id
+     *
+     * Optionally updates given Performance object $perf
+     ***/
+    
+    print_r($this->get_page('view2', $campano_id));
+
+  }
+
   /***
    * Helper functions
    ***/
@@ -151,6 +163,8 @@ class Campanophile {
 
 $c = Campanophile::getInstance();
 
-print_r($c->search(array('StartDate' => '26/05/2010', 'FinalDate' => '26/05/2010', 'Method' => 'Plain Bob Major')));
+$r = $c->search(array('StartDate' => '26/05/2010', 'FinalDate' => '26/05/2010', 'Method' => 'Plain Bob Major'));
+
+$r[0]->fetch_details();
 ?>
 

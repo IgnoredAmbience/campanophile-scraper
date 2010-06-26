@@ -12,9 +12,15 @@ class Performance {
   public $method = "";
   public $method_details = "";
   public $composer = "";
-  public $tower = true;
+  public $tower = false;
+  public $hand = false;
   public $ringers = Array();
   public $footnote = "";
+
+  public function fetch_details() {
+    $c = Campanophile::getInstance();
+    $c->get_performance($this->campano_id, self);
+  }
 }
 
 ?>
