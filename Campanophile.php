@@ -109,7 +109,8 @@ class Campanophile {
   }
 
   private function parse_location($str) {
-    // Location (Dedication), County
+    // String of form "Location (Dedication), County"
+    // Returns array containing keys of 'location', 'dedication' and 'county'
     preg_match(
       '/^(?P<location>.*?)(?: \((?<dedication>.*)\))?(?:, (?<county>[^,]*))?$/',
       $str, $matches);
