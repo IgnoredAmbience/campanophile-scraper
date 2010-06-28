@@ -16,7 +16,7 @@ class Performance {
   public $tenor_wt = "";
   public $changes = 0;
   public $method = "";
-  public $method_details = "";
+  public $composition = "";
   public $composer = "";
   public $ringers = Array();
   public $footnote = "";

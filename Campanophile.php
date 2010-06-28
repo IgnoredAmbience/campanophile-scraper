@@ -204,11 +204,14 @@ class Campanophile {
     
     advptr($div);
 
+    // Composition
+    // nodeName check to ensure ringers list not yet begun
     if($div->nodeName == 'div' && strstr($div->textContent, 'Composed by:') === false) {
-      $perf->method_details = $div->textContent;
+      $perf->composition = $div->textContent;
       advptr($div);
     }
 
+    // Composer
     if($div->nodeName == 'div') {
       $perf->composer = strstr($div->textContent, 'Composed by: ');
       advptr($div);
