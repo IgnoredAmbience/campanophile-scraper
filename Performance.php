@@ -52,6 +52,3 @@ class Performance {
     }
   }
 }
-
-?>
-

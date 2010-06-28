@@ -28,5 +28,3 @@ function mytrim($str, $more='') {
   return trim($str, "$more \t\r\n\0\x0B\xA0");
 }
 
-?>
-

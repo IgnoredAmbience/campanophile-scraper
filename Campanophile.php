@@ -257,6 +257,7 @@ class Campanophile {
 }
 
 function advptr(&$div) {
+  // Advances a DOM pointer to the next Element
   do {
     $div = $div->nextSibling;
   } while($div->nodeType != XML_ELEMENT_NODE);
@@ -270,6 +271,4 @@ $c = Campanophile::getInstance();
 
 $perf = $c->get_performance(88585);
 print_r($perf);
-
-?>
 
