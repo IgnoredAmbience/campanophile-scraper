@@ -171,9 +171,8 @@ class Campanophile {
     $dom->loadHTML($html);
     $div = $dom->getElementsByTagName('div')->item(0)->firstChild;
 
-
-    // Assume its the Society
-    if($div->childNodes->length == 1 && $div->firstChild->nodeName == 'b') {
+    // Check the following node - if it is also bold, then this is the society
+    if($div->nextSibling->firstChild->nodeName == 'b') {
       $perf->society = $div->textContent;
       advptr($div);
     }
@@ -186,7 +185,7 @@ class Campanophile {
     advptr($div);
     
     // Dedication
-    if($div->firstChild->nodeType == XML_TEXT_NODE) {
+    if(!preg_match('/^(Mon|Tues|Wednes|Thurs|Fri|Sat|Sun)day,/', $div->textContent)) {
       $perf->dedication = $div->textContent;
       advptr($div);
     }
