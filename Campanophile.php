@@ -131,19 +131,16 @@ class Campanophile {
       $p->date = strtotime($node->firstChild->textContent);
       $loc = $node->firstChild->firstChild->attributes->getNamedItem('href')->textContent;
       $loc = explode($this->session_key, $loc);
-      $p->campano_id = $loc[1];
+      $p->campano_id = (int) $loc[1];
 
       // Second cell, locational details
       $matches = $this->parse_location($node->firstChild->nextSibling->textContent);
-      foreach(array('location', 'dedication', 'county') as $field) {
-        $p->$field = $matches[$field];
-      }
+      $p->apply_array($matches);
 
       // Third cell, method details
-      // 1234 Funny Principle Major
-      preg_match('/(\d+) (.*)/', $node->lastChild->textContent, $matches);
-      $p->changes = (int) $matches[1];
-      $p->method = $matches[2];
+      $matches = $this->parse_method($node->lastChild->textContent);
+      $p->apply_array($matches);
+
       $performances[] = $p;
     }
 
@@ -154,9 +151,22 @@ class Campanophile {
     // String of form "Location (Dedication), County"
     // Returns array containing keys of 'location', 'dedication' and 'county'
     preg_match(
-      '/^(?P<location>.*?)(?: \((?<dedication>.*)\))?(?:, (?<county>[^,]*))?$/',
+      '/^(?P<location>.*?)(?: \((?P<dedication>.*)\))?(?:, (?P<county>[^,]*))?$/',
       $str, $matches);
-    return $matches + array('location' => '', 'dedication' => '', 'county' => '');
+    return $matches;
+  }
+
+  private function parse_method($str) { 
+    // 1234 Funny Principle Major
+    preg_match('/(?P<changes>\d+) (?P<method>.*)/', $str, $matches);
+    $matches['changes'] = (int) $matches['changes'];
+    return $matches;
+  }
+
+  private function parse_length($str) {
+    preg_match('/(?:(?P<h>\d{1,2})\D*)?(?P<m>\d{2})\D*$/', $str, $matches);
+    $len = $matches['h'] * 60 + $matches['m'];
+    return $len;
   }
 
 }

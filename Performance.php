@@ -21,6 +21,14 @@ class Performance {
     $c = Campanophile::getInstance();
     $c->get_performance($this->campano_id, self);
   }
+
+  public function apply_array($arr) {
+    foreach($arr as $k => $v) {
+      if(property_exists($this, $k)) {
+        $this->$k = $v;
+      }
+    }
+  }
 }
 
 ?>
