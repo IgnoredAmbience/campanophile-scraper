@@ -78,8 +78,14 @@ class Campanophile {
      * Optionally updates given Performance object $perf
      ***/
     
-    print_r($this->get_page('view2', $campano_id));
+    if(!$perf) $perf = new Performance($campano_id);
+    $perf->campano_id = $campano_id;
 
+    $page_content = $this->get_page('view2', 'F'.$campano_id);
+
+    $this->parse_perf_page($page_content, $perf);
+
+    return $perf;
   }
 
   /***
@@ -147,6 +153,85 @@ class Campanophile {
     return $performances;
   }
 
+  private function parse_perf_page($html, $perf) {
+    /***
+     * Page format:
+     * <div><b>Society</b></div> (optional)
+     * <div><b>Location</b>, County</div> (county optional)
+     * <div>Dedication</div> (optional)
+     * <div><b>Method</b></div>
+     * <div>Method details</div> (optional)
+     * <div>Composed by: Composer</div> (optional)
+     *  <span style="width: 42px;">1-2</span>   Name<br> 
+     *  <span style="display: inline-block; text-align: right; width: 24px">1</span>   Name<br> 
+     * ...
+     * <div>Footnotes</div> (always present)
+     ***/
+    $dom = new DOMDocument();
+    $dom->loadHTML($html);
+    $div = $dom->getElementsByTagName('div')->item(0)->firstChild;
+
+
+    // Assume its the Society
+    if($div->childNodes->length == 1 && $div->firstChild->nodeName == 'b') {
+      $perf->society = $div->textContent;
+      advptr($div);
+    }
+
+    // Location, County
+    $perf->location = $div->firstChild->textContent;
+    if($div->lastChild->nodeType == XML_TEXT_NODE)
+      $perf->county = trim($div->lastChild->textContent, " ,.");
+
+    advptr($div);
+    
+    // Dedication
+    if($div->firstChild->nodeType == XML_TEXT_NODE) {
+      $perf->dedication = $div->textContent;
+      advptr($div);
+    }
+
+    // Date in Time (Weight)
+    preg_match('/^(?P<date>.*?)(?: in (?P<length>.*?))?(?: \((?P<tenor_wt>.*)\))?$/',
+      $div->textContent, $matches);
+    $perf->date = strtotime($matches['date']);
+    $perf->length = $this->parse_length($matches['length']);
+    $perf->tenor_wt = $matches['tenor_wt'];
+    
+    advptr($div);
+
+    //Method
+    $perf->apply_array($this->parse_method($div->textContent));
+    
+    advptr($div);
+
+    if($div->nodeName == 'div' && strstr($div->textContent, 'Composed by:') === false) {
+      $perf->method_details = $div->textContent;
+      advptr($div);
+    }
+
+    if($div->nodeName == 'div') {
+      $perf->composer = strstr($div->textContent, 'Composed by: ');
+      advptr($div);
+    }
+
+    // Check tower/hand
+    if(strstr($div->textContent, '-') === false) 
+      $perf->setTower();
+    else
+      $perf->setHand();
+
+    // Get Ringers
+    while($div->nodeName == 'span') {
+      $perf->ringers[] = new Ringer($div->nextSibling->textContent);
+      advptr($div);
+      advptr($div);
+    }
+
+    // The Footnote
+    $perf->footnote = trim($div->textContent);
+  }
+
   private function parse_location($str) {
     // String of form "Location (Dedication), County"
     // Returns array containing keys of 'location', 'dedication' and 'county'
@@ -171,10 +256,20 @@ class Campanophile {
 
 }
 
+function advptr(&$div) {
+  do {
+    $div = $div->nextSibling;
+  } while($div->nodeType != XML_ELEMENT_NODE);
+}
+
 $c = Campanophile::getInstance();
 
-$r = $c->search(array('StartDate' => '26/05/2010', 'FinalDate' => '26/05/2010', 'Method' => 'Plain Bob Major'));
+#$r = $c->search(array('StartDate' => '26/05/2010', 'FinalDate' => '26/05/2010', 'Method' => 'Plain Bob Major'));
+#var_dump($r);
+#$r[0]->fetch_details();
 
-$r[0]->fetch_details();
+$perf = $c->get_performance(88585);
+print_r($perf);
+
 ?>
 
