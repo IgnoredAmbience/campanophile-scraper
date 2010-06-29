@@ -2,8 +2,23 @@
 require_once('Performance.php');
 
 class Campanophile {
-  const CBASE = 'http://www.campanophile.com/';
   private $session_key = '';
+ 
+  /***
+   * Configuration
+   ***/
+
+  const CBASE = 'http://www.campanophile.com/';
+  // The maximum number of results the website will return for a search
+  const MAX_RETURNED = 100;
+
+  private function get_default_search_params() {
+    return array(
+      'StartDate' => date('d/m/Y', time()-31556926), // 1 year
+      'FinalDate' => date('d/m/Y'),
+      'TypeCode'  => 2
+    );
+  }
 
   /***
    * Constructors
@@ -39,6 +54,7 @@ class Campanophile {
   public function search($params = array()) {
     /***
      * Returns outline set of matching performances
+     * Only a maximum of 100 (or as many as Campanophile allow) will be returned
      *
      * $params is an array of any of the following:
      *   StartDate: "dd/mm/yyyy" // defaults to today - 1 year
@@ -54,12 +70,8 @@ class Campanophile {
      *   TypeCode: 1 // Quarters
      *   TypeCode: 2 // Both the above (default)
      ***/
-
-    $defaults = array(
-      'StartDate' => date('d/m/Y', time()-31556926),
-      'FinalDate' => date('d/m/Y'),
-      'TypeCode'  => 2
-    );
+    
+    $defaults = $this->get_default_search_params();
 
     $curl = curl_init($this->gen_url('find2'));
     curl_setopt($curl, CURLOPT_POST, true);
@@ -68,6 +80,25 @@ class Campanophile {
     curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
     $results_html = curl_exec($curl);
     return $this->parse_search_results($results_html);
+  }
+
+  public function search_all($params = array()) {
+    /***
+     * Returns outline set of all matching performances without the 100 limit
+     * 
+     * $params as per search
+     ***/
+
+    $defaults = $this->get_default_search_params();
+    $params += $defaults;
+    
+    $results = $result = $this->search($params);
+    while(count($result) == 100) {
+      $params['FinalDate'] = date('d/m/Y', end($result)->date);
+      $result = $this->search($params);
+      $results += $result;
+    }
+    return $results;
   }
 
   public function get_performance($campano_id, $perf = null) {
@@ -147,7 +178,7 @@ class Campanophile {
       $matches = $this->parse_method($node->lastChild->textContent);
       $p->apply_array($matches);
 
-      $performances[] = $p;
+      $performances[$p->campano_id] = $p;
     }
 
     return $performances;
