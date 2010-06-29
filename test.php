@@ -12,12 +12,6 @@ print_r(current($r));
 */
 
 /* testing search_all */
-$r = $c->search(array('Guild' => 'Surrey Association'));
-var_dump($r);
-
-$a = $c->search_all(array('Guild' => 'Surrey Association'));
+$a = $c->search_all(array('StartDate' => '01/01/2009', 'FinalDate' => '31/12/2009', 'Guild' => 'Surrey Association'));
 var_dump($a);
-
-printf("search: %d elements, search_all: %d elements\n", count($r), count($a));
-?>
 

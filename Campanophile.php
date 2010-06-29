@@ -1,4 +1,5 @@
 <?php
+require_once('functions.php');
 require_once('Performance.php');
 
 class Campanophile {
@@ -264,7 +265,7 @@ class Campanophile {
     }
 
     // The Footnote
-    $perf->footnote = trim($div->textContent);
+    $perf->footnote = trim(dombr2nl($div));
   }
 
   private function parse_location($str) {
@@ -288,13 +289,5 @@ class Campanophile {
     $len = $matches['h'] * 60 + $matches['m'];
     return $len;
   }
-
-}
-
-function advptr(&$div) {
-  // Advances a DOM pointer to the next Element
-  do {
-    $div = $div->nextSibling;
-  } while($div->nodeType != XML_ELEMENT_NODE);
 }
 

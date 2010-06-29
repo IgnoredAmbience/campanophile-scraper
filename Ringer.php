@@ -1,4 +1,6 @@
 <?php
+require_once("functions.php");
+
 class Ringer {
   public $name = '';
   public $conductor = false;
@@ -21,10 +23,5 @@ class Ringer {
       $this->name = mytrim(str_replace($footnote, '', $str));
     }
   }
-}
-
-function mytrim($str, $more='') {
-  // Because &nbsp; is annoying
-  return trim($str, "$more \t\r\n\0\x0B\xA0");
 }
 
