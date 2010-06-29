@@ -41,7 +41,7 @@ class Performance {
 
   public function fetch_details() {
     $c = Campanophile::getInstance();
-    $c->get_performance($this->campano_id, self);
+    $c->get_performance($this->campano_id, $this);
   }
 
   public function apply_array($arr) {

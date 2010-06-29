@@ -171,6 +171,8 @@ class Campanophile {
     $dom->loadHTML($html);
     $div = $dom->getElementsByTagName('div')->item(0)->firstChild;
 
+    if($div == NULL) return;
+
     // Check the following node - if it is also bold, then this is the society
     if($div->nextSibling->firstChild->nodeName == 'b') {
       $perf->society = $div->textContent;
@@ -213,7 +215,7 @@ class Campanophile {
 
     // Composer
     if($div->nodeName == 'div') {
-      $perf->composer = strstr($div->textContent, 'Composed by: ');
+      $perf->composer = substr($div->textContent, strlen('Composed by: '));
       advptr($div);
     }
 
@@ -264,13 +266,4 @@ function advptr(&$div) {
     $div = $div->nextSibling;
   } while($div->nodeType != XML_ELEMENT_NODE);
 }
-
-$c = Campanophile::getInstance();
-
-#$r = $c->search(array('StartDate' => '26/05/2010', 'FinalDate' => '26/05/2010', 'Method' => 'Plain Bob Major'));
-#var_dump($r);
-#$r[0]->fetch_details();
-
-$perf = $c->get_performance(88585);
-print_r($perf);
 
