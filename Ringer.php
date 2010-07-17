@@ -1,5 +1,5 @@
 <?php
-require_once("functions.php");
+require_once('functions.php');
 
 class Ringer {
   public $name = '';
@@ -19,7 +19,7 @@ class Ringer {
 
     // Check for further in-name footnotes (will not find additional ones after (c))
     if(($footnote = strstr($this->name, '(')) !== false) {
-      $this->footnote = mytrim($footnote, "()");
+      $this->footnote = mytrim($footnote, '()');
       $this->name = mytrim(str_replace($footnote, '', $str));
     }
   }

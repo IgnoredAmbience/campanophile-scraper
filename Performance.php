@@ -18,10 +18,10 @@ class Performance {
   public $method = "";
   public $composition = "";
   public $composer = "";
-  public $ringers = Array();
+  public $ringers = Array(); // Array of Ringer objects
   public $footnote = "";
   
-  private $type = self::TYPE_UNKNOWN;
+  public $type = self::TYPE_UNKNOWN;
 
   public function isHand() {
     return $this->type == self::TYPE_HAND;
