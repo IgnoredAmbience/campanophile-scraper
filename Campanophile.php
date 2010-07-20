@@ -240,14 +240,22 @@ class Campanophile {
 
     // Composition
     // nodeName check to ensure ringers list not yet begun
-    if($div->nodeName == 'div' && strstr($div->textContent, 'Composed by:') === false) {
-      $perf->composition = $div->textContent;
-      advptr($div);
+    // This is either composer or composition
+    if($div->nodeName == 'div') {
+
+      // If next node is a div, this must be composition
+      // Composer field *often* prefixed by Arranged or Composed but not always
+      // So will sometimes end up in Composition field if Composition not present
+      if($div->nextSibling->nodeName == 'div'
+      || !preg_match('/^(Arranged|Composed): /', $div->textContent)) {
+        $perf->composition = $div->textContent;
+        advptr($div);
+      }
     }
 
     // Composer
     if($div->nodeName == 'div') {
-      $perf->composer = substr($div->textContent, strlen('Composed by: '));
+      $perf->composer = str_replace(array('Arranged: ', 'Composed: '), '', $div->textContent);
       advptr($div);
     }
 
