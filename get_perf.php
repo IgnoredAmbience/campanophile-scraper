@@ -3,7 +3,7 @@
 require('Campanophile.php');
 
 if($argc < 2) {
-  die('Needs integer parameter of Campanophile ID');
+  die("Needs integer parameter of Campanophile ID\n");
 }
 
 $c = Campanophile::getInstance();
