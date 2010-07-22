@@ -1,12 +1,18 @@
 <?php
+require_once('DatabaseRecord.php');
 require_once('functions.php');
 
-class Ringer {
-  public $name = '';
+class RingerPerformance extends DatabaseRecord {
+  public $bell = 0;
+  public $credit = '';
   public $conductor = false;
   public $footnote = ''; // At present, only footnotes derived from constructor
 
-  public function __construct($str) {
+  public function __construct($str, $bell) {
+    if(!$str) return;
+
+    $this->bell = (int) $bell;
+
     $str = utf8_decode($str);
 
     // Check for conductor, and strip (C... if found

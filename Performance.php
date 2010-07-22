@@ -1,11 +1,13 @@
 <?php
-require_once('Ringer.php');
+require_once('DatabaseRecord.php');
+require_once('RingerPerformance.php');
 
-class Performance {
+class Performance extends DatabaseRecord {
   const TYPE_UNKNOWN = 0;
   const TYPE_TOWER = 1;
   const TYPE_HAND = 2;
 
+  public $id = 0;
   public $campano_id = 0;
   public $date = 0; // as unix timestamp
   public $society = "";
@@ -18,9 +20,8 @@ class Performance {
   public $method = "";
   public $composition = "";
   public $composer = "";
-  public $ringers = Array(); // Array of Ringer objects
+  public $ringers = Array(); // Array of RingerPerformance objects
   public $footnote = "";
-  
   public $type = self::TYPE_UNKNOWN;
 
   public function isHand() {
@@ -39,16 +40,13 @@ class Performance {
     return $this->type = self::TYPE_TOWER;
   }
 
-  public function fetch_details() {
+  public function fetch_campanophile_details() {
     $c = Campanophile::getInstance();
     $c->get_performance($this->campano_id, $this);
   }
 
-  public function apply_array($arr) {
-    foreach($arr as $k => $v) {
-      if(property_exists($this, $k)) {
-        $this->$k = $v;
-      }
-    }
+  public function post_db_fetch($db) {
+    $this->ringers =
+      $db->fetch_all('RingerPerformances', 'performance_id', $this->id);
   }
 }

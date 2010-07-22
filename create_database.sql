@@ -1,5 +1,6 @@
 CREATE TABLE performances (
-  campano_id MEDIUMINT UNSIGNED PRIMARY KEY,
+  id MEDIUMINT UNSIGNED PRIMARY KEY AUTO_INCREMENT,
+  campano_id MEDIUMINT UNSIGNED UNIQUE,
   date DATE,
   society VARCHAR(70), -- max in Campanophile so far is 57 (Aberystwyth Uni)
   county VARCHAR(30),  -- max found 26 (NSW, Aus)
@@ -17,16 +18,16 @@ CREATE TABLE performances (
 );
 
 CREATE TABLE ringers (
-  ringer_id MEDIUMINT UNSIGNED PRIMARY KEY AUTO_INCREMENT,
+  id MEDIUMINT UNSIGNED PRIMARY KEY AUTO_INCREMENT,
   first_name VARCHAR(25),
   middle_names VARCHAR(50),
   last_name VARCHAR(25)
 );
 
-CREATE TABLE performance_ringers (
-  performance_id MEDIUMINT UNSIGNED REFERENCES performances(campano_id),
-  ringer_id MEDIUMINT UNSIGNED REFERENCES ringers(ringer_id),
+CREATE TABLE ringer_performances (
+  performance_id MEDIUMINT UNSIGNED REFERENCES performances(id),
   bell TINYINT UNSIGNED,
+  ringer_id MEDIUMINT UNSIGNED REFERENCES ringers(id),
   credit VARCHAR(50), -- name as submitted
   conductor BOOLEAN,
   footnote VARCHAR(50),
