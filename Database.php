@@ -40,7 +40,8 @@ class Database {
 
   function fetch($class, $id, $force = false) {
     // Fetches a record of given class an Primary Key
-    self::_check_class($class);
+    if(!self::_check_class($class))
+      throw new Exception('Invalid class');
 
     $object = $this->_fetch_cache($class, $id);
     
@@ -65,7 +66,8 @@ class Database {
 
   /* TODO review this
    * function fetch_all($class, $field, $value) {
-    self::_check_class($class);
+     if(!self::_check_class($class))
+       throw new Exception('Invalid class');
 
     $value = mysql_real_escape_string($value);
     $table = self::_class_to_table($class);
@@ -89,8 +91,7 @@ class Database {
    */
 
   static function _check_class($class) {
-    if(!(class_exists($class) && is_subclass_of($class, 'DatabaseRecord')))
-      throw new Exception('Class not a DatabaseRecord');
+    return class_exists($class) && is_subclass_of($class, 'DatabaseRecord');
   }
 
   static function _class_to_table($class) {

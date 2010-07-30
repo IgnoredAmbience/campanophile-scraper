@@ -17,8 +17,7 @@ abstract class DatabaseRecord {
   }
 
   public function __get($name) {
-    try {
-      Database::_check_class($name);
+    if(Database::_check_class($name)) {
       $prop = $name . '_' . constant($name.'::pk');
       if($this->$prop) {
         return Database::fetch($name, $this->$prop);
@@ -28,7 +27,7 @@ abstract class DatabaseRecord {
         }
         return $this->_cache[$name];
       }
-    } catch (Exception $e) {
+    } else {
       $trace = debug_backtrace();
       trigger_error(
         'Undefined property via __set(): ' . $name .  ' in '
@@ -38,8 +37,7 @@ abstract class DatabaseRecord {
   }
 
   public function __set($name, $value) {
-    try {
-      Database::_check_class($name);
+    if(Database::_check_class($name)) {
       $pk = constant($name . '::pk');
       $prop = $name . '_' . $pk;
       if($value->$pk) {
@@ -49,7 +47,7 @@ abstract class DatabaseRecord {
         $this->$prop = 0;
         $this->_cache[$name] = $value;
       }
-    } catch (Exception $e) {
+    } else {
       $trace = debug_backtrace();
       trigger_error(
         'Undefined property via __set(): ' . $name .  ' in '
