@@ -294,7 +294,7 @@ class Campanophile {
   }
 
   private function parse_length($str) {
-    preg_match('/(?:(?P<h>\d{1,2})\D*)?(?P<m>\d{2})\D*$/', $str, $matches);
+    preg_match('/(?:(?P<h>\d{1,2})\D*)?(?P<m>\d{1,2})\D*$/', $str, $matches);
     $len = $matches['h'] * 60 + $matches['m'];
     return $len;
   }
