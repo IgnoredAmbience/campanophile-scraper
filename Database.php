@@ -5,6 +5,7 @@ require_once('Performance.php');
 class Database {
   private $handle;
   private $cache = array(); // caches retrieved records
+  private static $instances = array();
 
   function __construct($host, $user, $pass, $db) {
     $this->handle = mysql_connect($host, $user, $pass, true);
@@ -13,10 +14,19 @@ class Database {
 
     if(!mysql_select_db($db, $this->handle))
       throw new Exception(mysql_error($this->handle));
+
+    self::$instances[] = $this;
   }
 
   function __destruct() {
     mysql_close($this->handle);
+  }
+
+  static function get_instance($id = 0) {
+    if(self::$instances[$id])
+      return self::$instances[$id];
+    else
+      throw new Exception('No Databases instantiated');
   }
 
   function raw_query($query) {
@@ -58,6 +68,7 @@ class Database {
 
       $object = mysql_fetch_object($result, $class);
       $this->_put_cache($class, $id, $object);
+      $object->_set_db($this);
       $object->post_db_fetch($this);
     }
 
@@ -89,6 +100,41 @@ class Database {
     return $objects;
   }
    */
+
+  public function insert($object) {
+    $class = get_class($object);
+    $data = get_object_vars($object); // public context
+    unset($data[constant($class.'::pk')]);
+
+    $fields = $this->_field_list($data);
+    $values = $this->_value_list($data);
+
+    $table = self::_class_to_table($class);
+
+    $result = $this->raw_query("
+      INSERT INTO `$table` $fields
+      VALUES $values;
+    ");
+
+    if(!$result)
+      throw new Exception("MySQL error: ".mysql_error());
+
+    return mysql_insert_id($this->handle);
+  }
+
+  function _field_list($data) {
+    return '('.implode(',', array_keys($data)).')';
+  }
+
+  function _value_list($data) {
+    $values = array_values($data);
+    $ret = '(';
+    foreach($values as $value) {
+      $ret .= "'".mysql_real_escape_string($value)."',";
+    }
+    $ret[strlen($ret)-1] = ')';
+    return $ret;
+  }
 
   static function _check_class($class) {
     return class_exists($class) && is_subclass_of($class, 'DatabaseRecord');

@@ -1,4 +1,6 @@
 <?php
+require_once('Database.php');
+
 abstract class DatabaseRecord {
   /**
    * Class that holds common implementation for Classes representing
@@ -7,6 +9,7 @@ abstract class DatabaseRecord {
 
   const pk = 'id';
   private $_cache = array();
+  private $_db = NULL;
 
   public function apply_array($arr) {
     foreach($arr as $k => $v) {
@@ -14,6 +17,10 @@ abstract class DatabaseRecord {
         $this->$k = $v;
       }
     }
+  }
+
+  public function _set_db(Database $db) {
+    $this->_db = $db;
   }
 
   public function __get($name) {
@@ -54,6 +61,15 @@ abstract class DatabaseRecord {
         . $trace[0]['file'] .  ' on line ' . $trace[0]['line']
         , E_USER_NOTICE);
     }
+  }
+
+  public function save() {
+    if($this->_db)
+      $db = $this->_db;
+    else
+      $db = Database::get_instance();
+
+    $db->insert($this);
   }
 
   // Placeholder for code to execute after fetching from db

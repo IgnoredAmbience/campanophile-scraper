@@ -8,7 +8,7 @@ class RingerPerformance extends DatabaseRecord {
   public $conductor = false;
   public $footnote = ''; // At present, only footnotes derived from constructor
 
-  public function __construct($str, $bell) {
+  public function __construct($str = '', $bell = 0) {
     if(!$str) return;
 
     $this->bell = (int) $bell;
