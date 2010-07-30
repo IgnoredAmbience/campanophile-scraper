@@ -4,6 +4,7 @@ require_once('Performance.php');
 
 class Database {
   private $handle;
+  private $cache = array(); // caches retrieved records
 
   function __construct($host, $user, $pass, $db) {
     $this->handle = mysql_connect($host, $user, $pass, true);
@@ -24,28 +25,46 @@ class Database {
     return $result;
   }
 
-  function fetch($class, $id) {
+  private function _fetch_cache($class, $id) {
+    $class = strtolower($class);
+    if(isset($this->cache[$class]) && isset($this->cache[$class][$id])) {
+      return $this->cache[$class][$id];
+    } else
+      return NULL;
+  }
+
+  private function _put_cache($class, $id, $object) {
+    $class = strtolower($class);
+    $this->cache[$class][$id] = $object;
+  }
+
+  function fetch($class, $id, $force = false) {
     // Fetches a record of given class an Primary Key
     self::_check_class($class);
 
-    $object = new $class();
-    $id = (int) $id;
-    $pk = $object::pk;
-    $table = self::_class_to_table($class);
+    $object = $this->_fetch_cache($class, $id);
+    
+    if($object === NULL || $force) {
+      $id = (int) $id;
+      $pk = $class::pk;
+      $table = self::_class_to_table($class);
 
-    $result = $this->raw_query("
-      SELECT * FROM $table
-      WHERE $pk = $id
-      LIMIT 0,1
-    ");
+      $result = $this->raw_query("
+        SELECT * FROM $table
+        WHERE $pk = $id
+        LIMIT 0,1
+      ");
 
-    $object->apply_array(mysql_fetch_assoc($result));
-    $object->post_db_fetch($this);
+      $object = mysql_fetch_object($result, $class);
+      $this->_put_cache($class, $id, $object);
+      $object->post_db_fetch($this);
+    }
 
     return $object;
   }
 
-  function fetch_all($class, $field, $value) {
+  /* TODO review this
+   * function fetch_all($class, $field, $value) {
     self::_check_class($class);
 
     $value = mysql_real_escape_string($value);
@@ -67,6 +86,7 @@ class Database {
 
     return $objects;
   }
+   */
 
   static function _check_class($class) {
     if(!(class_exists($class) && is_subclass_of($class, 'DatabaseRecord')))
