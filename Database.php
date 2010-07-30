@@ -47,7 +47,7 @@ class Database {
     
     if($object === NULL || $force) {
       $id = (int) $id;
-      $pk = $class::pk;
+      $pk = constant($class.'::pk');
       $table = self::_class_to_table($class);
 
       $result = $this->raw_query("
