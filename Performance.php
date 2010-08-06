@@ -20,7 +20,6 @@ class Performance extends DatabaseRecord {
   public $method = "";
   public $composition = "";
   public $composer = "";
-  public $ringers = Array(); // Array of RingerPerformance objects
   public $footnote = "";
   public $type = self::TYPE_UNKNOWN;
 

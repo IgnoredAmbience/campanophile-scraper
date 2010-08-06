@@ -3,8 +3,10 @@ require_once('DatabaseRecord.php');
 require_once('functions.php');
 
 class RingerPerformance extends DatabaseRecord {
+  public $performance_id = 0;
   public $bell = 0;
-  public $credit = '';
+  public $ringer_id = 0;
+  public $credit = '';  // Unmodified
   public $conductor = false;
   public $footnote = ''; // At present, only footnotes derived from constructor
 
@@ -13,20 +15,21 @@ class RingerPerformance extends DatabaseRecord {
 
     $this->bell = (int) $bell;
 
-    $str = utf8_decode($str);
+    $name = utf8_decode($str);
+    $this->credit = $name;
 
     // Check for conductor, and strip (C... if found
     if(($end = stripos($str, '(c')) !== false) {
-      $this->name = mytrim(substr($str, 0, $end));
+      $name = mytrim(substr($str, 0, $end));
       $this->conductor = true;
     } else {
-      $this->name = mytrim($str);
+      $name = mytrim($str);
     }
 
     // Check for further in-name footnotes (will not find additional ones after (c))
-    if(($footnote = strstr($this->name, '(')) !== false) {
+    if(($footnote = strstr($name, '(')) !== false) {
       $this->footnote = mytrim($footnote, '()');
-      $this->name = mytrim(str_replace($footnote, '', $str));
+      $name = mytrim(str_replace($footnote, '', $name));
     }
   }
 }

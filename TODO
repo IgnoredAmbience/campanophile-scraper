@@ -1,4 +1,4 @@
-* Add checks to DatabaseRecord->save to handle 'belongs to' relationships
-* Write code for 'has many' relationships, especially Performance->ringers
+* Add checks to DatabaseRecord->save to handle relationships
+* Enhance RingerPerformance -> Ringer detection
 * More useful front-end scripts
 

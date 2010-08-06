@@ -1,6 +1,7 @@
 <?php
 require_once('functions.php');
 require_once('Performance.php');
+require_once('RecordCollection.php');
 
 class Database {
   private $handle;
@@ -75,10 +76,9 @@ class Database {
     return $object;
   }
 
-  /* TODO review this
-   * function fetch_all($class, $field, $value) {
-     if(!self::_check_class($class))
-       throw new Exception('Invalid class');
+  function fetch_all($class, $field, $value) {
+    if(!self::_check_class($class))
+      throw new Exception('Invalid class');
 
     $value = mysql_real_escape_string($value);
     $table = self::_class_to_table($class);
@@ -88,18 +88,15 @@ class Database {
       WHERE $field = '$value'
     ");
 
-    $objects = Array();
+    $objects = new RecordCollection();
 
-    while($row = mysql_fetch_assoc($result)) {
-      $object = new $class();
-      $object->apply_array($row);
+    while($object = mysql_fetch_object($result, $class)) {
       $object->post_db_fetch($this);
-      $objects[] = $object;
+      $objects->add($object, true);
     }
 
     return $objects;
   }
-   */
 
   public function insert($object) {
     $class = get_class($object);
@@ -143,6 +140,7 @@ class Database {
   static function _class_to_table($class) {
     // Converts class name to table name
     // eg: DatabaseRecord => database_record
+    if(is_object($class)) $class = get_class($class);
     if(!is_string($class)) return '';
 
     $table = strtolower($class[0]);
@@ -155,6 +153,11 @@ class Database {
       }
     }
     $table .= 's';
+    return $table;
+  }
+
+  static function _table_to_class($table) {
+    $table = str_replace('_', '', $table);
     return $table;
   }
 }
