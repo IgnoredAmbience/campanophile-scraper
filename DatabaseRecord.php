@@ -125,6 +125,7 @@ abstract class DatabaseRecord {
         $item->save();
         $item->delete_removed();
       }
+    }
   }
 
   function _pk() {

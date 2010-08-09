@@ -4,7 +4,7 @@ require('Campanophile.php');
 $c = Campanophile::getInstance();
 $db = new Database('localhost', 'root', '', 'campanophile');
 
-$r = $c->search(array('StartDate' => '26/05/2010', 'FinalDate' => '26/05/2010', 'Method' => 'Plain Bob Major'));
+$r = $c->search(array('StartDate' => '01/06/2010', 'FinalDate' => '31/06/2010', 'Guild' => 'University of London Society'));
 var_dump($r);
 $r = current($r);
 $r->fetch_campanophile_details();
