@@ -95,7 +95,7 @@ class Campanophile {
     
     $results = $result = $this->search($params);
     while(count($result) == 100) {
-      $params['FinalDate'] = date('d/m/Y', end($result)->date);
+      $params['FinalDate'] = $this->reverse_date(end($result)->date);
       $result = $this->search($params);
       $results += $result;
     }
@@ -166,7 +166,7 @@ class Campanophile {
       $p = new Performance();
 
       // First cell, date and hyperlink, including ID code appended to sessid
-      $p->date = strtotime($node->firstChild->textContent);
+      $p->date = $this->parse_date($node->firstChild->textContent);
       $loc = $node->firstChild->firstChild->attributes->getNamedItem('href')->textContent;
       $loc = explode($this->session_key, $loc);
       $p->campano_id = (int) $loc[1];
@@ -227,7 +227,7 @@ class Campanophile {
     // Date in Time (Weight)
     preg_match('/^(?P<date>.*?)(?: in (?P<length>.*?))?(?: \((?P<tenor_wt>.*)\))?$/',
       $div->textContent, $matches);
-    $perf->date = strtotime($matches['date']);
+    $perf->date = $this->parse_date($matches['date']);
     $perf->length = $this->parse_length($matches['length']);
     $perf->tenor_wt = $matches['tenor_wt'];
     
@@ -275,6 +275,16 @@ class Campanophile {
 
     // The Footnote
     $perf->footnote = trim(dombr2nl($div));
+  }
+
+  private function parse_date($str) {
+    // Parses date and returns in form YYYY/MM/DD
+    return date('Y/m/d', strtotime($str));
+  }
+
+  private function reverse_date($str) {
+    // Converts a date from YYYY/MM/DD to DD/MM/YYYY and vice versa
+    return implode('/', array_reverse(explode('/', $str)));
   }
 
   private function parse_location($str) {
