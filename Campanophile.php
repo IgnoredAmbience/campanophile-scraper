@@ -268,7 +268,7 @@ class Campanophile {
     // Get Ringers
     while($div->nodeName == 'span') {
       $perf->ringer_performances->add(new RingerPerformance($div->nextSibling->textContent,
-        count($perf->ringer_performances->size()) + 1));
+        $perf->ringer_performances->size() + 1));
       advptr($div);
       advptr($div);
     }
