@@ -23,4 +23,24 @@ class RecordCollection {
   function size() {
     return count($this->current);
   }
+
+  function apply_field($key, $value) {
+    foreach($this->current as $item) {
+      $item->$key = $value;
+    }
+  }
+
+  function save() {
+    foreach($this->current as $item) {
+      $item->save();
+    }
+  }
+
+  function delete_removed() {
+    $to_delete = array_diff($this->original, $this->current);
+    foreach($to_delete as $item) {
+      $item->delete();
+    }
+  }
 }
+

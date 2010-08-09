@@ -49,7 +49,7 @@ class Database {
     $this->cache[$class][$id] = $object;
   }
 
-  function fetch($class, $id, $force = false) {
+  public function fetch($class, $id, $force = false) {
     // Fetches a record of given class an Primary Key
     if(!self::_check_class($class))
       throw new Exception('Invalid class');
@@ -76,7 +76,7 @@ class Database {
     return $object;
   }
 
-  function fetch_all($class, $field, $value) {
+  public function fetch_all($class, $field, $value) {
     if(!self::_check_class($class))
       throw new Exception('Invalid class');
 
@@ -99,14 +99,13 @@ class Database {
   }
 
   public function insert($object) {
-    $class = get_class($object);
     $data = get_object_vars($object); // public context
-    unset($data[constant($class.'::pk')]);
+    unset($data[$object->_pk()]); // (auto-increments)
 
     $fields = $this->_field_list($data);
     $values = $this->_value_list($data);
 
-    $table = self::_class_to_table($class);
+    $table = self::_class_to_table($object);
 
     $result = $this->raw_query("
       INSERT INTO `$table` $fields
@@ -116,7 +115,30 @@ class Database {
     if(!$result)
       throw new Exception("MySQL error: ".mysql_error());
 
-    return mysql_insert_id($this->handle);
+    $id = mysql_insert_id($this->handle);
+    $this->_put_cache(get_class($object), $id, $object);
+    $object->_set_db($this);
+    return $id;
+  }
+
+  public function update($object, $pk = '') {
+    $data = get_object_vars($object);
+    $table = self::_class_to_table($object);
+
+    $pk = $pk ? $pk : $object->_pk();
+    $pkv = $data[$pk];
+    unset($data[$pk]);
+
+    $data_list = $this->_data_list($data);
+
+    $result = $this->raw_query("
+      UPDATE $table
+      SET $data_list
+      WHERE $pk = $pkv;
+    ");
+
+    if(!$result)
+      throw new Exception("MySQL error: ".mysql_error());
   }
 
   function _field_list($data) {
@@ -124,12 +146,23 @@ class Database {
   }
 
   function _value_list($data) {
-    $values = array_values($data);
     $ret = '(';
-    foreach($values as $value) {
+    foreach($data as $value) {
       $ret .= "'".mysql_real_escape_string($value)."',";
     }
     $ret[strlen($ret)-1] = ')';
+    return $ret;
+  }
+
+  function _data_list($data) {
+    $ret = '';
+    foreach($data as $field => $value) {
+      if($ret) {
+        $ret .= ', ';
+      }
+      $value = mysql_real_escape_string($value);
+      $ret .= "$field = '$value'";
+    }
     return $ret;
   }
 

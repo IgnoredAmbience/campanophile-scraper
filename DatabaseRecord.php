@@ -44,7 +44,7 @@ abstract class DatabaseRecord {
     ) {
       // Has many relationship
       if(!isset($this->_cache[$name])) {
-        $pk = constant(get_class($this).'::pk');
+        $pk = $this->_pk();
         if($this->$pk) {
           $fk = Database::_class_to_table($this) . "_$pk";
           $this->_cache[$name] = Database::fetch_all($child, $fk, $this->$pk);
@@ -92,6 +92,8 @@ abstract class DatabaseRecord {
   }
 
   public function save($db = NULL) {
+    // Will save any newly created 'parent' records
+    // Will save all associated 'child' records
     if(!$db) {
       if($this->_db)
         $db = $this->_db;
@@ -99,7 +101,36 @@ abstract class DatabaseRecord {
         $db = Database::get_instance();
     }
 
-    $db->insert($this);
+    foreach($this->_cache as $key => $item) {
+      if(is_a($item, 'DatabaseRecord')) {
+        $item->save();
+        $ipk = $item->_pk();
+        $fk = Database::_class_to_table($item) . '_' . $ipk;
+        $this->$fk = $item->$ipk;
+        unset($this->_cache[$key]);
+      }
+    }
+    
+    $pk = $this->_pk();
+
+    if($this->$pk) {
+      $db->update($this);
+    } else {
+      $this->$pk = $db->insert($this);
+    }
+
+    foreach($this->_cache as $key => $item) {
+      if(is_a($item, 'RecordCollection')) {
+        $item->apply_field(Database::_class_to_table($this).'_'.$pk, $this->$pk);
+        $item->save();
+        $item->delete_removed();
+      }
+  }
+
+  function _pk() {
+    // Helper function to return pk
+    // If PHP5.3 was our minimum, we'd just do static::pk...
+    return constant(get_class($this) . '::pk');
   }
 
   // Placeholder for code to execute after fetching from db
