@@ -170,9 +170,9 @@ class Database {
     return class_exists($class) && is_subclass_of($class, 'DatabaseRecord');
   }
 
-  static function _class_to_table($class) {
+  static function _class_to_table($class, $plural = true) {
     // Converts class name to table name
-    // eg: DatabaseRecord => database_record
+    // eg: DatabaseRecord => database_records
     if(is_object($class)) $class = get_class($class);
     if(!is_string($class)) return '';
 
@@ -185,7 +185,8 @@ class Database {
         $table .= $class[$i];
       }
     }
-    $table .= 's';
+    if($plural)
+      $table .= 's';
     return $table;
   }
 

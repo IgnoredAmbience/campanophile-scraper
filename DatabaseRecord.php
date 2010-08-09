@@ -46,8 +46,7 @@ abstract class DatabaseRecord {
       if(!isset($this->_cache[$name])) {
         $pk = $this->_pk();
         if($this->$pk) {
-          $fk = Database::_class_to_table($this) . "_$pk";
-          $this->_cache[$name] = Database::fetch_all($child, $fk, $this->$pk);
+          $this->_cache[$name] = Database::fetch_all($child, $this->_fk(), $this->$pk);
         } else {
           $this->_cache[$name] = new RecordCollection();
         }
@@ -57,11 +56,8 @@ abstract class DatabaseRecord {
     }
 
     // Catch failures
-    $trace = debug_backtrace();
-    trigger_error(
-      'Undefined property via __get(): ' . $name .  ' in '
-      . $trace[0]['file'] .  ' on line ' . $trace[0]['line']
-      , E_USER_NOTICE);
+    trigger_error( 'Undefined property via __get(): ' . $name, E_USER_NOTICE);
+    debug_print_backtrace();
   }
 
   public function __set($name, $value) {
@@ -84,11 +80,8 @@ abstract class DatabaseRecord {
     }
 
     // Catch failures
-    $trace = debug_backtrace();
-    trigger_error(
-      'Undefined property via __set(): ' . $name .  ' in '
-      . $trace[0]['file'] .  ' on line ' . $trace[0]['line']
-      , E_USER_NOTICE);
+    trigger_error( 'Undefined property via __set(): ' . $name, E_USER_NOTICE);
+    debug_print_backtrace();
   }
 
   public function save($db = NULL) {
@@ -105,7 +98,7 @@ abstract class DatabaseRecord {
       if(is_a($item, 'DatabaseRecord')) {
         $item->save();
         $ipk = $item->_pk();
-        $fk = Database::_class_to_table($item) . '_' . $ipk;
+        $fk = $item->_fk();
         $this->$fk = $item->$ipk;
         unset($this->_cache[$key]);
       }
@@ -121,7 +114,7 @@ abstract class DatabaseRecord {
 
     foreach($this->_cache as $key => $item) {
       if(is_a($item, 'RecordCollection')) {
-        $item->apply_field(Database::_class_to_table($this).'_'.$pk, $this->$pk);
+        $item->apply_field($this->_fk(), $this->$pk);
         $item->save();
         $item->delete_removed();
       }
@@ -132,6 +125,11 @@ abstract class DatabaseRecord {
     // Helper function to return pk
     // If PHP5.3 was our minimum, we'd just do static::pk...
     return constant(get_class($this) . '::pk');
+  }
+
+  function _fk() {
+    // Helper function to return the fk field name referencing this object
+    return Database::_class_to_table($this, false).'_'.$this->_pk();
   }
 
   // Placeholder for code to execute after fetching from db

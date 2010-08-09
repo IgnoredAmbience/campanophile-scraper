@@ -37,10 +37,11 @@ class RecordCollection {
   }
 
   function delete_removed() {
-    $to_delete = array_diff($this->original, $this->current);
-    foreach($to_delete as $item) {
-      $item->delete();
+    foreach($this->original as $item) {
+      if(!in_array($item, $this->current))
+        $item->delete();
     }
+    $this->original = $this->current;
   }
 }
 

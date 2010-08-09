@@ -3,6 +3,7 @@ require_once('DatabaseRecord.php');
 require_once('functions.php');
 
 class RingerPerformance extends DatabaseRecord {
+  public $id = 0;
   public $performance_id = 0;
   public $bell = 0;
   public $ringer_id = 0;

@@ -25,12 +25,12 @@ CREATE TABLE ringers (
 );
 
 CREATE TABLE ringer_performances (
+  id MEDIUMINT UNSIGNED PRIMARY KEY AUTO_INCREMENT,
   performance_id MEDIUMINT UNSIGNED REFERENCES performances(id),
   bell TINYINT UNSIGNED,
   ringer_id MEDIUMINT UNSIGNED REFERENCES ringers(id),
   credit VARCHAR(50), -- name as submitted
   conductor BOOLEAN,
-  footnote VARCHAR(50),
-  PRIMARY KEY (performance_id, bell)
+  footnote VARCHAR(50)
 );
 
