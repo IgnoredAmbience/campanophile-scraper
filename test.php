@@ -1,5 +1,5 @@
 <?php
-require('Campanophile.php');
+require('Campanoscraper/load.php');
 
 $c = Campanophile::getInstance();
 $db = new Database('localhost', 'root', '', 'campanophile');

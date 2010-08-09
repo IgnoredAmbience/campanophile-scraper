@@ -1,6 +1,6 @@
 #!/usr/bin/php
 <?php
-require('Campanophile.php');
+require('Campanoscraper/load.php');
 
 if($argc < 2) {
   die("Needs integer parameter of Campanophile ID\n");

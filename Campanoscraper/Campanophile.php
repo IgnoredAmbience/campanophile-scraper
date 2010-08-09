@@ -1,7 +1,4 @@
 <?php
-require_once('functions.php');
-require_once('Performance.php');
-
 class Campanophile {
   private $session_key = '';
  
@@ -208,7 +205,7 @@ class Campanophile {
     // Check the following node - if it is also bold, then this is the society
     if($div->nextSibling->firstChild->nodeName == 'b') {
       $perf->society = $div->textContent;
-      advptr($div);
+      $this->advptr($div);
     }
 
     // Location, County
@@ -216,12 +213,12 @@ class Campanophile {
     if($div->lastChild->nodeType == XML_TEXT_NODE)
       $perf->county = trim($div->lastChild->textContent, " ,.");
 
-    advptr($div);
+    $this->advptr($div);
     
     // Dedication
     if(!preg_match('/^(Mon|Tues|Wednes|Thurs|Fri|Sat|Sun)day,/', $div->textContent)) {
       $perf->dedication = $div->textContent;
-      advptr($div);
+      $this->advptr($div);
     }
 
     // Date in Time (Weight)
@@ -231,12 +228,12 @@ class Campanophile {
     $perf->length = $this->parse_length($matches['length']);
     $perf->tenor_wt = $matches['tenor_wt'];
     
-    advptr($div);
+    $this->advptr($div);
 
     //Method
     $perf->apply_array($this->parse_method($div->textContent));
     
-    advptr($div);
+    $this->advptr($div);
 
     // Composition
     // nodeName check to ensure ringers list not yet begun
@@ -249,14 +246,14 @@ class Campanophile {
       if($div->nextSibling->nodeName == 'div'
       || !preg_match('/^(Arranged|Composed): /', $div->textContent)) {
         $perf->composition = $div->textContent;
-        advptr($div);
+        $this->advptr($div);
       }
     }
 
     // Composer
     if($div->nodeName == 'div') {
       $perf->composer = str_replace(array('Arranged: ', 'Composed: '), '', $div->textContent);
-      advptr($div);
+      $this->advptr($div);
     }
 
     // Check tower/hand
@@ -269,12 +266,12 @@ class Campanophile {
     while($div->nodeName == 'span') {
       $perf->ringer_performances->add(new RingerPerformance($div->nextSibling->textContent,
         $perf->ringer_performances->size() + 1));
-      advptr($div);
-      advptr($div);
+      $this->advptr($div);
+      $this->advptr($div);
     }
 
     // The Footnote
-    $perf->footnote = trim(dombr2nl($div));
+    $perf->footnote = trim($this->dombr2nl($div));
   }
 
   private function parse_date($str) {
@@ -307,6 +304,29 @@ class Campanophile {
     preg_match('/(?:(?P<h>\d{1,2})\D*)?(?P<m>\d{1,2})\D*$/', $str, $matches);
     $len = $matches['h'] * 60 + $matches['m'];
     return $len;
+  }
+
+  private function advptr(&$div) {
+    // Advances a DOM pointer to the next Element
+    do {
+      $div = $div->nextSibling;
+    } while($div->nodeType != XML_ELEMENT_NODE);
+  }
+
+  private function dombr2nl($div) {
+    if($div == NULL) return '';
+
+    if($div->nodeType == XML_TEXT_NODE) {
+      return $div->textContent . $this->dombr2nl($div->nextSibling);
+    } elseif($div->nodeType == XML_ELEMENT_NODE) {
+      if($div->nodeName == 'br') {
+        return "\n" . $this->dombr2nl($div->nextSibling);
+      } else {
+        return $this->dombr2nl($div->firstChild);
+      }
+    } else {
+      return $this->dombr2nl($div->nextSibling);
+    }
   }
 }
 

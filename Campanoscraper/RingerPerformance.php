@@ -1,7 +1,4 @@
 <?php
-require_once('DatabaseRecord.php');
-require_once('functions.php');
-
 class RingerPerformance extends DatabaseRecord {
   public $id = 0;
   public $performance_id = 0;
@@ -21,17 +18,22 @@ class RingerPerformance extends DatabaseRecord {
 
     // Check for conductor, and strip (C... if found
     if(($end = stripos($str, '(c')) !== false) {
-      $name = mytrim(substr($str, 0, $end));
+      $name = $this->mytrim(substr($str, 0, $end));
       $this->conductor = true;
     } else {
-      $name = mytrim($str);
+      $name = $this->mytrim($str);
     }
 
     // Check for further in-name footnotes (will not find additional ones after (c))
     if(($footnote = strstr($name, '(')) !== false) {
-      $this->footnote = mytrim($footnote, '()');
-      $name = mytrim(str_replace($footnote, '', $name));
+      $this->footnote = $this->mytrim($footnote, '()');
+      $name = $this->mytrim(str_replace($footnote, '', $name));
     }
+  }
+
+  private function mytrim($str, $more='') {
+  // Because &nbsp; is annoying
+    return trim($str, "$more \t\r\n\0\x0B\xA0");
   }
 }
 

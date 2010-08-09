@@ -1,4 +1,3 @@
-* Add checks to DatabaseRecord->save to handle relationships
 * Enhance RingerPerformance -> Ringer detection
 * More useful front-end scripts
 * Framework for submission of performances to campanophile?

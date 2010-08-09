@@ -1,7 +1,4 @@
 <?php
-require_once('DatabaseRecord.php');
-require_once('RingerPerformance.php');
-
 class Performance extends DatabaseRecord {
   const TYPE_UNKNOWN = 0;
   const TYPE_TOWER = 1;

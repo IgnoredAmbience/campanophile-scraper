@@ -1,6 +1,4 @@
 <?php
-require_once('Database.php');
-
 abstract class DatabaseRecord {
   /**
    * Class that holds common implementation for Classes representing

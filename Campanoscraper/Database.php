@@ -1,8 +1,4 @@
 <?php
-require_once('functions.php');
-require_once('Performance.php');
-require_once('RecordCollection.php');
-
 class Database {
   private $handle;
   private $cache = array(); // caches retrieved records
@@ -191,6 +187,11 @@ class Database {
   }
 
   static function _table_to_class($table) {
+    $table[0] = strtoupper($table[0]);
+    for($i = 1; $i < strlen($table); $i++) {
+      if($table[$i-1] == '_')
+        $table[$i] = strtoupper($table[$i]);
+    }
     $table = str_replace('_', '', $table);
     return $table;
   }
