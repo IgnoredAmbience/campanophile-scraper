@@ -12,6 +12,7 @@ Classes
 -------
 * Campanophile - singleton class representing a session on the Campanophile website, has functions for accessing various features of the website
 * Database storage stuff: (yes, project focus slippage!)
+
   * Database - misc local database functions
   * DatabaseRecord - misc functions for storing objects in the database
   * RecordCollection - essentially an array
