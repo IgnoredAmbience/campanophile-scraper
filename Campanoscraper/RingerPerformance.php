@@ -21,7 +21,8 @@ class RingerPerformance extends DatabaseRecord {
     // Find other bracketed comments and add them to the footnote
     $str = preg_replace_callback( '|\((.+)\)|', array($this, 'replace_footnote'), $str);
 
-    $this->credit = $this->mytrim($str);
+    $str = $this->credit = $this->mytrim($str);
+    $this->ringer = Ringer::find($str);
   }
 
   private function replace_footnote($matches) {
