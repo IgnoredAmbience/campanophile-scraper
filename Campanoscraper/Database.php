@@ -26,23 +26,27 @@ class Database {
       throw new Exception('No Databases instantiated');
   }
 
-  function raw_query($query) {
+  public function raw_query($query) {
     $result = mysql_query($query, $this->handle);
     if(!$result) throw new Exception(mysql_error());
     return $result;
   }
 
-  private function _fetch_cache($class, $id) {
-    $class = strtolower($class);
-    if(isset($this->cache[$class]) && isset($this->cache[$class][$id])) {
-      return $this->cache[$class][$id];
-    } else
-      return NULL;
-  }
+  public function raw_fetch_all($where, $class) {
+    if(!self::_check_class($class))
+      throw new Exception('Invalid class');
+    $table = self::_class_to_table($class);
 
-  private function _put_cache($class, $id, $object) {
-    $class = strtolower($class);
-    $this->cache[$class][$id] = $object;
+    $result = $this->raw_query("SELECT * FROM $table WHERE $where");
+
+    $objects = new RecordCollection();
+
+    while($object = mysql_fetch_object($result, $class)) {
+      $object->post_db_fetch($this);
+      $objects->add($object, true);
+    }
+
+    return $objects;
   }
 
   public function fetch($class, $id, $force = false) {
@@ -73,25 +77,9 @@ class Database {
   }
 
   public function fetch_all($class, $field, $value) {
-    if(!self::_check_class($class))
-      throw new Exception('Invalid class');
+    $value = $this->escape($value);
 
-    $value = mysql_real_escape_string($value);
-    $table = self::_class_to_table($class);
-
-    $result = $this->raw_query("
-      SELECT * FROM $table
-      WHERE $field = '$value'
-    ");
-
-    $objects = new RecordCollection();
-
-    while($object = mysql_fetch_object($result, $class)) {
-      $object->post_db_fetch($this);
-      $objects->add($object, true);
-    }
-
-    return $objects;
+    return $this->raw_fetch_all("$field = '$value'", $class);
   }
 
   public function insert($object) {
@@ -137,6 +125,23 @@ class Database {
       throw new Exception("MySQL error: ".mysql_error());
   }
 
+  public function escape($str) { 
+    return mysql_real_escape_string($str);
+  }
+
+  private function _fetch_cache($class, $id) {
+    $class = strtolower($class);
+    if(isset($this->cache[$class]) && isset($this->cache[$class][$id])) {
+      return $this->cache[$class][$id];
+    } else
+      return NULL;
+  }
+
+  private function _put_cache($class, $id, $object) {
+    $class = strtolower($class);
+    $this->cache[$class][$id] = $object;
+  }
+
   function _field_list($data) {
     return '('.implode(',', array_keys($data)).')';
   }
@@ -144,7 +149,7 @@ class Database {
   function _value_list($data) {
     $ret = '(';
     foreach($data as $value) {
-      $ret .= "'".mysql_real_escape_string($value)."',";
+      $ret .= "'".$this->escape($value)."',";
     }
     $ret[strlen($ret)-1] = ')';
     return $ret;
@@ -156,7 +161,7 @@ class Database {
       if($ret) {
         $ret .= ', ';
       }
-      $value = mysql_real_escape_string($value);
+      $value = $this->escape($value);
       $ret .= "$field = '$value'";
     }
     return $ret;
