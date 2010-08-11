@@ -20,6 +20,10 @@ class RecordCollection {
     }
   }
 
+  function fetch($idx) {
+    return $this->current[$idx];
+  }
+
   function size() {
     return count($this->current);
   }
