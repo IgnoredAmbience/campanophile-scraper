@@ -22,29 +22,30 @@ abstract class DatabaseRecord {
   }
 
   public function __get($name) {
-    $name = Database::_table_to_class($name);
-    if(Database::_check_class($name)) {
+    $class = Database::_table_to_class($name);
+    if(Database::_check_class($class)) {
     // Belongs to relationship
-      $prop = $name . '_' . constant($name.'::pk');
+      $prop = $name . '_' . constant($class.'::pk');
       if(property_exists($this, $prop)) {
         if($this->$prop) {
           return Database::fetch($name, $this->$prop);
         } else {
           if(!isset($this->_cache[$name])) {
-            $this->__set($name, new $name);
+            $this->__set($name, new $class);
           }
           return $this->_cache[$name];
         }
       }
     } elseif (
-      $name[strlen($name)-1] == 's'
-      && Database::_check_class($child = substr($name, 0, -1))
+      // This needs much tidying
+      $class[strlen($class)-1] == 's'
+      && Database::_check_class(substr($class, 0, -1))
     ) {
       // Has many relationship
       if(!isset($this->_cache[$name])) {
         $pk = $this->_pk();
         if($this->$pk) {
-          $this->_cache[$name] = Database::fetch_all($child, $this->_fk(), $this->$pk);
+          $this->_cache[$name] = Database::fetch_all(substr($name, 0, -1), $this->_fk(), $this->$pk);
         } else {
           $this->_cache[$name] = new RecordCollection();
         }
@@ -59,9 +60,9 @@ abstract class DatabaseRecord {
   }
 
   public function __set($name, $value) {
-    $name = Database::_table_to_class($name);
-    if(Database::_check_class($name)) {
-      $pk = constant($name . '::pk');
+    $class = Database::_table_to_class($name);
+    if(Database::_check_class($class)) {
+      $pk = constant($class . '::pk');
       $prop = $name . '_' . $pk;
 
       if(property_exists($this, $prop)) {
