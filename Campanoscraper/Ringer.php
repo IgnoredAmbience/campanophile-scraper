@@ -60,7 +60,7 @@ class Ringer extends DatabaseRecord {
       $ringers = $db->raw_fetch_all("
         first_name = '$fn'  AND
         last_name = '$ln'   AND
-        middle_names REGEXP '$regex'
+        middle_names REGEXP '\$$regex^'
       ", get_class());
       if(!$ringers->size()) {
         return $parsed;
