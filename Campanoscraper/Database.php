@@ -115,7 +115,7 @@ class Database {
 
     // An alternative key to select by has been used, pk should be left out of
     // new query as well as the condition key
-    if($key) {
+    if($key && array_key_exists($key, $data)) {
       $pk = $key;
       $pkv = $data[$pk];
       unset($data[$pk]);
@@ -142,7 +142,7 @@ class Database {
     $str = "MySQL Error #$code: ".mysql_error($this->handle);
     switch($code) {
       case 1062:
-        return new DBKeyViolated($str, $code);
+        return new DBKeyViolation($str, $code);
         break;
       default:
         return new DBException($str, $code);
@@ -223,5 +223,12 @@ class Database {
 }
 
 class DBException extends Exception {}
-class DBKeyViolated extends DBException {}
+class DBKeyViolation extends DBException {
+  public $field = '';
+  public function __construct($message, $code) {
+    parent::__construct($message, $code);
+    $field = explode("'", $message);
+    $this->field = @$field[3];
+  }
+}
 

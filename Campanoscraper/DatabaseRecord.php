@@ -83,15 +83,15 @@ abstract class DatabaseRecord {
     debug_print_backtrace();
   }
 
-  public function save($db = NULL) {
+  public function save($force = false) {
     // Will save any newly created 'parent' records
     // Will save all associated 'child' records
-    if(!$db) {
-      if($this->_db)
-        $db = $this->_db;
-      else
-        $db = Database::get_instance();
-    }
+    //
+    // $force will force an update to be made in the event of conflicting keys
+    if($this->_db)
+      $db = $this->_db;
+    else
+      $db = Database::get_instance();
 
     foreach($this->_cache as $key => $item) {
       if(is_a($item, 'DatabaseRecord')) {
@@ -105,10 +105,18 @@ abstract class DatabaseRecord {
     
     $pk = $this->_pk();
 
-    if($this->$pk) {
-      $db->update($this);
-    } else {
-      $this->$pk = $db->insert($this);
+    try {
+      if($this->$pk) {
+        $db->update($this);
+      } else {
+        $this->$pk = $db->insert($this);
+      }
+    } catch (DBKeyViolation $e) {
+      if($force) {
+        $db->update($this, $e->field);
+      } else {
+        throw $e;
+      }
     }
 
     foreach($this->_cache as $key => $item) {
