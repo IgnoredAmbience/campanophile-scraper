@@ -4,8 +4,9 @@ require('Campanoscraper/load.php');
 $c = Campanophile::getInstance();
 $db = new Database('localhost', 'root', '', 'campanophile');
 
-//$r = $c->search(array('StartDate' => '01/06/2010', 'FinalDate' => '30/06/2010', 'Guild' => 'University of London Society'));
-//var_dump($r);
+$r = $c->browse();
+print_r($r);
+/*
 //$r = current($r);
 //$r->fetch_campanophile_details();
 

@@ -18,6 +18,17 @@ class Campanophile {
     );
   }
 
+  private function get_default_browse_params() {
+    return array(
+      'DateCode' => 0,
+      'Type1' => true,
+      'Type2' => true,
+      'Type3' => true,
+      'Type4' => true,
+      'OrderBySubmission' => true
+    );
+  }
+
   /***
    * Constructors
    ***/
@@ -117,6 +128,39 @@ class Campanophile {
     return $perf;
   }
 
+  public function browse($params = array()) {
+    /***
+     * Returns outline set of results from the Campanophile 'Browse' pages
+     * It is recommended to only use this function for browse by submission
+     * date, as browsing by date rung is probably best done through the search
+     * function.
+     *
+     * $params is an array containing any of the following:
+     *   DateCode: starting date offset from today, negative integer,
+     *     defaults to 0 (today)
+     *   Type1: boolean flag for peals, default true
+     *   Type2: boolean flag for quarters, default true
+     *   Type3: boolean flag for tower performances, default true
+     *   Type4: boolean flag for performances in hand, default true
+     *   OrderBySubmission: boolean flag for ordering by date submitted or rung,
+     *     default true (date submitted)
+     *
+     * Returns: 2 dimensional array of Performances, indexed by date
+     * submitted/rung and campanophile id
+     ***/
+
+    $defaults = $this->get_default_browse_params();
+
+    $curl = curl_init($this->gen_url('list4'));
+    curl_setopt($curl, CURLOPT_POST, true);
+    curl_setopt($curl, CURLOPT_POSTFIELDS,
+      http_build_query($params));
+    curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
+    $html = curl_exec($curl);
+
+    return $this->parse_browse_results($html);
+  }
+
   /***
    * Helper functions
    ***/
@@ -151,7 +195,62 @@ class Campanophile {
   // Page parsing
   //
 
+  private function parse_browse_results($html) {
+    // Will return 2D array first indexed by Submission/Rung date
+    // and then by campanophile id
+    $dom = new DOMDocument();
+    // The Campanophile HTML is invalid but still just about parsable!
+    @$dom->loadHTML($html);
+    $rows = $dom->getElementsByTagName('tr');
+
+    $mode = 0;  // 1 if browsing by submission date
+
+    $perfs = array();
+
+    foreach($rows as $row) {
+      $cell = $row->firstChild;
+      if($cell->nodeName == 'th') {
+        // A date row
+        if(!$mode && $cell->getAttribute('colspan') == 3)
+          $mode = 1;
+
+        $today = $this->parse_date($cell->textContent);
+        $perfs[$today] = array();
+      } elseif($cell->nodeName == 'td') {
+        // A performance row
+
+        $p = new Performance();
+
+        // Location/ID
+        $p->apply_array($this->parse_location($cell->textContent));
+        $cid  = $cell->firstChild;
+        $cid = $cid->getAttribute('href');
+        $cid = explode($this->session_key, $cid);
+        $p->campano_id = (int) $cid[1];
+
+        $this->advptr($cell);
+
+        // Date rung
+        if($mode) {
+          $p->date = $this->parse_date($cell->textContent);
+          $this->advptr($cell);
+        } else {
+          $p->date = $today;
+        }
+
+        // Method
+        $p->apply_array($this->parse_method($cell->textContent));
+
+        $perfs[$today][$p->campano_id] = $p;
+      } else {
+        // We have no idea what sort of row it is
+      }
+    }
+    return $perfs;
+  }
+
   private function parse_search_results($html) {
+    // find2.aspx
     $dom = new DOMDocument();
     $dom->loadHTML($html);
     $rows = $dom->getElementsByTagName('tr');
