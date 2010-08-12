@@ -105,13 +105,21 @@ class Database {
     return $id;
   }
 
-  public function update($object, $pk = '') {
+  public function update($object, $key = '') {
     $data = get_object_vars($object);
     $table = self::_class_to_table($object);
 
-    $pk = $pk ? $pk : $object->_pk();
+    $pk = $object->_pk();
     $pkv = $data[$pk];
     unset($data[$pk]);
+
+    // An alternative key to select by has been used, pk should be left out of
+    // new query as well as the condition key
+    if($key) {
+      $pk = $key;
+      $pkv = $data[$pk];
+      unset($data[$pk]);
+    }
 
     $data_list = $this->_data_list($data);
 
