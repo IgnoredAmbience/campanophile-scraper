@@ -7,10 +7,10 @@ class Database {
   function __construct($host, $user, $pass, $db) {
     $this->handle = mysql_connect($host, $user, $pass, true);
     if(!$this->handle)
-      throw new Exception(mysql_error());
+      throw $this->error();
 
     if(!mysql_select_db($db, $this->handle))
-      throw new Exception(mysql_error($this->handle));
+      throw $this->error();
 
     self::$instances[] = $this;
   }
@@ -28,7 +28,7 @@ class Database {
 
   public function raw_query($query) {
     $result = mysql_query($query, $this->handle);
-    if(!$result) throw new Exception(mysql_error());
+    if(!$result) throw $this->error();
     return $result;
   }
 
@@ -97,7 +97,7 @@ class Database {
     ");
 
     if(!$result)
-      throw new Exception("MySQL error: ".mysql_error());
+      throw $this->error();
 
     $id = mysql_insert_id($this->handle);
     $this->_put_cache(get_class($object), $id, $object);
@@ -122,11 +122,23 @@ class Database {
     ");
 
     if(!$result)
-      throw new Exception("MySQL error: ".mysql_error());
+      throw $this->error();
   }
 
   public function escape($str) { 
     return mysql_real_escape_string($str);
+  }
+
+  public function error() {
+    $code = mysql_errno($this->handle);
+    $str = "MySQL Error #$code: ".mysql_error($this->handle);
+    switch($code) {
+      case 1062:
+        return new DBKeyViolated($str, $code);
+        break;
+      default:
+        return new DBException($str, $code);
+    }
   }
 
   private function _fetch_cache($class, $id) {
@@ -201,4 +213,7 @@ class Database {
     return $table;
   }
 }
+
+class DBException extends Exception {}
+class DBKeyViolated extends DBException {}
 
