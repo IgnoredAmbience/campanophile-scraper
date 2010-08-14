@@ -10,15 +10,22 @@ class Campanophile {
   // The maximum number of results the website will return for a search
   const MAX_RETURNED = 100;
 
-  private function get_default_search_params() {
+  static function get_default_search_params() {
     return array(
       'StartDate' => date('d/m/Y', time()-31556926), // 1 year
       'FinalDate' => date('d/m/Y'),
+      'Guild' => '',
+      'Location' => '',
+      'County' => '',
+      'Dedication' => '',
+      'Method' => '',
+      'Composer' => '',
+      'Ringer' => '',
       'TypeCode'  => 2
     );
   }
 
-  private function get_default_browse_params() {
+  static function get_default_browse_params() {
     return array(
       'DateCode' => 0,
       'Type1' => true,
@@ -80,7 +87,7 @@ class Campanophile {
      *   TypeCode: 2 // Both the above (default)
      ***/
     
-    $defaults = $this->get_default_search_params();
+    $defaults = self::get_default_search_params();
 
     $curl = curl_init($this->gen_url('find2'));
     curl_setopt($curl, CURLOPT_POST, true);
@@ -98,7 +105,7 @@ class Campanophile {
      * $params as per search
      ***/
 
-    $defaults = $this->get_default_search_params();
+    $defaults = self::get_default_search_params();
     $params += $defaults;
     
     $results = $result = $this->search($params);
@@ -118,7 +125,10 @@ class Campanophile {
      * Optionally updates given Performance object $perf
      ***/
     
-    if(!$perf) $perf = new Performance($campano_id);
+    $campano_id = (int) $campano_id;
+    if(!$campano_id) throw new Exception("Invalid id");
+
+    if(!$perf) $perf = new Performance();
     $perf->campano_id = $campano_id;
 
     $page_content = $this->get_page('view2', 'F'.$campano_id);
@@ -149,7 +159,7 @@ class Campanophile {
      * submitted/rung and campanophile id
      ***/
 
-    $defaults = $this->get_default_browse_params();
+    $defaults = self::get_default_browse_params();
 
     $curl = curl_init($this->gen_url('list4'));
     curl_setopt($curl, CURLOPT_POST, true);
@@ -400,8 +410,12 @@ class Campanophile {
   }
 
   private function parse_length($str) {
+    $len = 0;
     preg_match('/(?:(?P<h>\d{1,2})\D*)?(?P<m>\d{1,2})\D*$/', $str, $matches);
-    $len = $matches['h'] * 60 + $matches['m'];
+    if(isset($matches['h']))
+      $len += $matches['h'] * 60;
+    if(isset($matches['m']))
+      $len += $matches['m'];
     return $len;
   }
 
