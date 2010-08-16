@@ -11,6 +11,12 @@ class Ringer extends DatabaseRecord {
       $parts = explode(' ', $name);
       $this->first_name = array_shift($parts);
       $this->last_name = array_pop($parts);
+      foreach($parts as $idx => $part) {
+        if($part == strtoupper($part)) {
+          // Assume conjoined initials
+          array_splice($parts, $idx, 1, str_split($part));
+        }
+      }
       $this->middle_names = implode(' ', $parts);
     }
   }
