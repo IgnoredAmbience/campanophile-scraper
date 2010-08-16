@@ -361,7 +361,11 @@ class Campanophile {
 
     // Composer
     if($div->nodeName == 'div') {
-      $perf->composer = str_replace(array('Arranged: ', 'Composed: '), '', $div->textContent);
+      $perf->composer = str_replace(
+        array('Arranged: ', 'Composed: ', 'Generated: '),
+        '',
+        $div->textContent
+      );
       $this->advptr($div);
     }
 
