@@ -40,9 +40,4 @@ class Performance extends DatabaseRecord {
     $c = Campanophile::getInstance();
     $c->get_performance($this->campano_id, $this);
   }
-
-  public function post_db_fetch($db) {
-    $this->ringers =
-      $db->fetch_all('RingerPerformances', 'performance_id', $this->id);
-  }
 }
