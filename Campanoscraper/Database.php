@@ -49,7 +49,7 @@ class Database {
     return $objects;
   }
 
-  public function fetch($class, $id, $force = false) {
+  public function fetch($class, $id, $force = false, $pk = '') {
     // Fetches a record of given class an Primary Key
     if(!self::_check_class($class))
       throw new Exception('Invalid class');
@@ -58,7 +58,7 @@ class Database {
     
     if($object === NULL || $force) {
       $id = (int) $id;
-      $pk = constant($class.'::pk');
+      $pk = $pk ? $pk : constant($class.'::pk');
       $table = self::_class_to_table($class);
 
       $result = $this->raw_query("

@@ -16,7 +16,11 @@ if($form) {
     $p = $c->get_performance($form['id']);
   } else {
     // Do some finding stuff
-    $p = new Performance();
+    if($form['database'] == 1) {
+      $p = $db->fetch('Performance', $form['id']);
+    } else {
+      $p = $db->fetch('Performance', $form['id'], false, 'campano_id');
+    }
   }
 
   foreach(get_object_vars($p) as $field => $val) {
@@ -26,7 +30,7 @@ if($form) {
 ?>
 <form method="get">
 <?php
-  $form_fields['database'] = array('Campanophile', 'Local Database');
+  $form_fields['database'] = array('Campanophile', 'Local Database', 'Local Database (Using Campanophile ID)');
   echo produce_form($form_fields);
 ?>
 <input type="submit" />

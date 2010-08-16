@@ -34,9 +34,12 @@ function get_form($template = array()) {
   return $return;
 }
 
-function html_performance_table($performances) {
+function html_performance_table($performances, $check = false) {
+  // This needs a rewrite
+  $ch = $check ? '<th></th>' : '';
   $html = <<<EOF
 <table><tr>
+  $ch
   <th>#</th>
   <th>Date</th>
   <th>Location</th>
@@ -46,11 +49,14 @@ EOF;
 
   $performances = array_reverse($performances);
   foreach($performances as $k => $performance) {
+    $cb = $check
+      ? "<td><input type='checkbox' name='selected_rows[]' value='$performance->campano_id' checked='checked'/></td>"
+      : '';
     $location = $performance->location . 
       ($performance->dedication ? " ($performance->dedication)" : '') .
       ($performance->county ? ", $performance->county" : '');
     $html .= <<<EOF
-<tr><td>$k</td><td>$performance->date</td><td>$location</td><td>$performance->changes $performance->method</td></tr>
+<tr>$cb<td>$k</td><td>$performance->date</td><td>$location</td><td>$performance->changes $performance->method</td></tr>
 EOF;
   }
 
