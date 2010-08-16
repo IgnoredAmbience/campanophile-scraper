@@ -333,6 +333,8 @@ class Campanophile {
     // Date in Time (Weight)
     preg_match('/^(?P<date>.*?)(?: in (?P<length>.*?))?(?: \((?P<tenor_wt>.*)\))?$/',
       $div->textContent, $matches);
+    $matches += array('date' => '', 'length' => '', 'tenor_wt' => '');
+
     $perf->date = $this->parse_date($matches['date']);
     $perf->length = $this->parse_length($matches['length']);
     $perf->tenor_wt = $matches['tenor_wt'];
@@ -403,7 +405,7 @@ class Campanophile {
     preg_match(
       '/^(?P<location>.*?)(?: \((?P<dedication>.*)\))?(?:, (?P<county>[^,]*))?$/',
       $str, $matches);
-    return $matches;
+    return $matches + array('location' => '', 'dedication' => '', 'county' => '');
   }
 
   private function parse_method($str) { 
