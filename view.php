@@ -23,9 +23,10 @@ if($form) {
     }
   }
 
-  foreach(get_object_vars($p) as $field => $val) {
-    echo "$field: $val<br />";
-  }
+  echo '<pre>';
+  print_r($p);
+  echo '</pre>';
+
 } else {
 ?>
 <form method="get">
