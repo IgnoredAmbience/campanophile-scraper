@@ -353,7 +353,7 @@ class Campanophile {
       // Composer field *often* prefixed by Arranged or Composed but not always
       // So will sometimes end up in Composition field if Composition not present
       if($div->nextSibling->nodeName == 'div'
-      || !preg_match('/^(Arranged|Composed): /', $div->textContent)) {
+      || !preg_match('/^(Arranged|Composed|Generated): /', $div->textContent)) {
         $perf->composition = $div->textContent;
         $this->advptr($div);
       }
