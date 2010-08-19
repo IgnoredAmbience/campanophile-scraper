@@ -2,6 +2,7 @@
 class Database {
   private $handle;
   private $cache = array(); // caches retrieved records
+  private $last_query = "";
   private static $instances = array();
 
   function __construct($host, $user, $pass, $db) {
@@ -27,6 +28,7 @@ class Database {
   }
 
   public function raw_query($query) {
+    $this->last_query = $query;
     $result = mysql_query($query, $this->handle);
     if(!$result) throw $this->error();
     return $result;
@@ -140,6 +142,7 @@ class Database {
   public function error() {
     $code = mysql_errno($this->handle);
     $str = "MySQL Error #$code: ".mysql_error($this->handle);
+    $str .= "\nOn query: '$this->last_query'";
     switch($code) {
       case 1062:
         return new DBKeyViolation($str, $code);
