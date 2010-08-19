@@ -17,10 +17,6 @@ abstract class DatabaseRecord {
     }
   }
 
-  public function _set_db(Database $db) {
-    $this->_db = $db;
-  }
-
   public function __get($name) {
     $class = Database::_table_to_class($name);
     if(Database::_check_class($class)) {
@@ -28,7 +24,7 @@ abstract class DatabaseRecord {
       $prop = $name . '_' . constant($class.'::pk');
       if(property_exists($this, $prop)) {
         if($this->$prop) {
-          return Database::fetch($name, $this->$prop);
+          return $this->_get_db()->fetch($name, $this->$prop);
         } else {
           if(!isset($this->_cache[$name])) {
             $this->__set($name, new $class);
@@ -45,7 +41,9 @@ abstract class DatabaseRecord {
       if(!isset($this->_cache[$name])) {
         $pk = $this->_pk();
         if($this->$pk) {
-          $this->_cache[$name] = Database::fetch_all(substr($name, 0, -1), $this->_fk(), $this->$pk);
+          $this->_cache[$name] =
+            $this->_get_db()
+                 ->fetch_all(substr($name, 0, -1), $this->_fk(), $this->$pk);
         } else {
           $this->_cache[$name] = new RecordCollection();
         }
@@ -88,10 +86,7 @@ abstract class DatabaseRecord {
     // Will save all associated 'child' records
     //
     // $force will force an update to be made in the event of conflicting keys
-    if($this->_db)
-      $db = $this->_db;
-    else
-      $db = Database::get_instance();
+    $db = $this->_get_db();
 
     foreach($this->_cache as $key => $item) {
       if(is_a($item, 'DatabaseRecord')) {
@@ -126,6 +121,17 @@ abstract class DatabaseRecord {
         $item->delete_removed();
       }
     }
+  }
+
+  function _get_db() {
+    if($this->_db)
+      return $this->_db;
+    else
+      return Database::get_instance();
+  }
+
+  function _set_db(Database $db) {
+    $this->_db = $db;
   }
 
   function _pk() {
