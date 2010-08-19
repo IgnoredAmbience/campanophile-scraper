@@ -24,7 +24,7 @@ abstract class DatabaseRecord {
       $prop = $name . '_' . constant($class.'::pk');
       if(property_exists($this, $prop)) {
         if($this->$prop) {
-          return $this->_get_db()->fetch($name, $this->$prop);
+          return $this->_get_db()->fetch($class, $this->$prop);
         } else {
           if(!isset($this->_cache[$name])) {
             $this->__set($name, new $class);
@@ -43,7 +43,7 @@ abstract class DatabaseRecord {
         if($this->$pk) {
           $this->_cache[$name] =
             $this->_get_db()
-                 ->fetch_all(substr($name, 0, -1), $this->_fk(), $this->$pk);
+                 ->fetch_all(substr($class, 0, -1), $this->_fk(), $this->$pk);
         } else {
           $this->_cache[$name] = new RecordCollection();
         }

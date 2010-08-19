@@ -36,7 +36,7 @@ class Database {
 
   public function raw_fetch_all($where, $class) {
     if(!self::_check_class($class))
-      throw new Exception('Invalid class');
+      throw new Exception("Invalid class: $class");
     $table = self::_class_to_table($class);
 
     $result = $this->raw_query("SELECT * FROM $table WHERE $where");
