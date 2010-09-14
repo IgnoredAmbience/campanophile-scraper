@@ -1,7 +1,10 @@
 <?php
 function __autoload($name) {
-  @include_once $name . '.php';
-//  if (!class_exists($name, false))
-//    trigger_error("Unable to load class: $name", E_USER_NOTICE);
+  $file = $name . '.php';
+  if(file_exists(dirname(__FILE__) . "/$file")) {
+    include_once $file;
+  } else {
+    //trigger_error("Could not load class: $file");
+  }
 }
 
