@@ -1,5 +1,5 @@
 <?php
-class RecordCollection {
+class RecordCollection implements Iterator {
   private $original = array();
   private $current = array();
 
@@ -20,22 +20,31 @@ class RecordCollection {
     }
   }
 
-  function fetch($idx) {
-    return $this->current[$idx];
-  }
-
   function size() {
     return count($this->current);
   }
 
   function apply_field($key, $value) {
-    foreach($this->current as $item) {
+    foreach($this as $item) {
       $item->$key = $value;
     }
   }
 
+  function filter($callback, $params = array()) {
+    $obj = NULL;
+    $return = new self;
+    if(is_array($callback) && $callback[0] == '$obj')
+      $callback[0] =& $obj;
+
+    foreach($this as $obj)
+      if(call_user_func_array($callback, $params))
+        $return->add($obj, true);
+
+    return $return;
+  }
+
   function save() {
-    foreach($this->current as $item) {
+    foreach($this as $item) {
       $item->save();
     }
   }
@@ -46,6 +55,27 @@ class RecordCollection {
         $item->delete();
     }
     $this->original = $this->current;
+  }
+
+  function to_array() {
+    return $this->current;
+  }
+
+  // Iterator
+  function current() {
+    return current($this->current);
+  }
+  function key() {
+    return key($this->current);
+  }
+  function next() {
+    next($this->current);
+  }
+  function rewind() {
+    reset($this->current);
+  }
+  function valid() {
+    return key($this->current) !== NULL;
   }
 }
 

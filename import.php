@@ -25,9 +25,18 @@ if(isset($_REQUEST['selected_rows'])) {
   } else {
     $res = $c->search($search_form_results);
   }
+
+  if($_REQUEST['name_filter']) {
+    foreach($res as $perf) 
+      $perf->fetch_campanophile_details();
+    $res = Filters::ringer_name($res, $_REQUEST['name_filter']);
+  }
+
   echo html_performance_table($res, true);
 } else {
   echo produce_form($defaults);
+  echo "Post-search filters:<br />";
+  echo "Ringer name: <input type='text' name='name_filter' /><br />";
   echo "<input type='checkbox' name='fetch_all' /> Fetch more than 100 results?<br />";
 
 }

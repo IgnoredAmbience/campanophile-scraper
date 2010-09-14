@@ -40,4 +40,10 @@ class Performance extends DatabaseRecord {
     $c = Campanophile::getInstance();
     $c->get_performance($this->campano_id, $this);
   }
+
+  public function has_ringer($ringer) {
+    return (bool) $this->ringer_performances
+                       ->filter(array('$obj', 'matches_name'), array($ringer))
+                       ->size();
+  }
 }

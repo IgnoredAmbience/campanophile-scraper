@@ -209,8 +209,6 @@ class Campanophile {
   //
 
   private function parse_browse_results($html) {
-    // Will return 2D array first indexed by Submission/Rung date
-    // and then by campanophile id
     $dom = new DOMDocument();
     // The Campanophile HTML is invalid but still just about parsable!
     @$dom->loadHTML($html);
@@ -218,7 +216,7 @@ class Campanophile {
 
     $mode = 0;  // 1 if browsing by submission date
 
-    $perfs = array();
+    $perfs = new RecordCollection();
 
     foreach($rows as $row) {
       $cell = $row->firstChild;
@@ -228,7 +226,6 @@ class Campanophile {
           $mode = 1;
 
         $today = $this->parse_date($cell->textContent);
-        $perfs[$today] = array();
       } elseif($cell->nodeName == 'td') {
         // A performance row
 
@@ -254,7 +251,7 @@ class Campanophile {
         // Method
         $p->apply_array($this->parse_method($cell->textContent));
 
-        $perfs[$today][$p->campano_id] = $p;
+        $perfs->add($p);
       } else {
         // We have no idea what sort of row it is
       }
@@ -268,7 +265,7 @@ class Campanophile {
     $dom->loadHTML($html);
     $rows = $dom->getElementsByTagName('tr');
 
-    $performances = array();
+    $performances = new RecordCollection();
 
     for($i = 1; $i < $rows->length; $i++) {
       $node = $rows->item($i);
@@ -288,7 +285,7 @@ class Campanophile {
       $matches = $this->parse_method($node->lastChild->textContent);
       $p->apply_array($matches);
 
-      $performances[$p->campano_id] = $p;
+      $performances->add($p);
     }
 
     return $performances;

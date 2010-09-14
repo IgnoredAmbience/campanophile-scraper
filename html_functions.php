@@ -35,6 +35,8 @@ function get_form($template = array()) {
 }
 
 function html_performance_table($performances, $check = false) {
+  if(!is_array($performances))
+    $performances = $performances->to_array();
   // This needs a rewrite
   $ch = $check ? '<th></th>' : '';
   $html = <<<EOF

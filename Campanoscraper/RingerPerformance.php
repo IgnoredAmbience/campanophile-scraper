@@ -25,6 +25,10 @@ class RingerPerformance extends DatabaseRecord {
     $this->ringer = Ringer::find($str);
   }
 
+  public function matches_name($name) {
+    return $this->ringer->matches($name);
+  }
+
   private function replace_footnote($matches) {
     $this->footnote .= $matches[1] . "\n";
     return "";

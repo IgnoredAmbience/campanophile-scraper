@@ -53,6 +53,16 @@ class Ringer extends DatabaseRecord {
     return $ret;
   }
 
+  public function matches($other) {
+    if(is_string($other))
+      $other = new self($other);
+    elseif(!is_a($other, get_class()))
+      return false;
+
+    return $this->first_name == $other->first_name
+      &&   $this->last_name == $other->last_name
+      &&   preg_match('/^'.$this->middle_names_regex().'$/', $other->middle_names);
+  }
 
   static function find($name) {
     $parsed = new self($name);
