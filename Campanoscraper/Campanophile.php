@@ -160,8 +160,11 @@ class Campanophile {
      ***/
 
     $defaults = self::get_default_browse_params();
+    $params += $defaults;
 
-    $curl = curl_init($this->gen_url('list4'));
+    $page = $params['OrderBySubmission'] ? 'list3' : 'list2';
+
+    $curl = curl_init($this->gen_url($page));
     curl_setopt($curl, CURLOPT_POST, true);
     curl_setopt($curl, CURLOPT_POSTFIELDS,
       http_build_query($params));
@@ -235,7 +238,7 @@ class Campanophile {
         $p->apply_array($this->parse_location($cell->textContent));
         $cid  = $cell->firstChild;
         $cid = $cid->getAttribute('href');
-        $cid = explode($this->session_key, $cid);
+        $cid = explode($this->session_key . 'F', $cid);
         $p->campano_id = (int) $cid[1];
 
         $this->advptr($cell);
