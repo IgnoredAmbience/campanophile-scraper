@@ -55,7 +55,7 @@ class Campanophile {
 
   private function __clone() {}
 
-  public function getInstance($session = '') {
+  public static function getInstance($session = '') {
     // Singleton class
     static $instance = null;
     if(!$instance) $instance = new self($session);
