@@ -131,7 +131,7 @@ class Campanophile {
     if(!$perf) $perf = new Performance();
     $perf->campano_id = $campano_id;
 
-    $page_content = $this->get_page('view2', 'F'.$campano_id);
+    $page_content = $this->get_page('view4', 'F'.$campano_id);
 
     $this->parse_perf_page($page_content, $perf);
 
@@ -306,7 +306,8 @@ class Campanophile {
      * <div>Footnotes</div> (always present)
      ***/
     $dom = new DOMDocument();
-    $dom->loadHTML($html);
+    // Invalid HTML - must find a way to suppress this more elegantly!
+    @$dom->loadHTML($html);
     $div = $dom->getElementsByTagName('div')->item(0)->firstChild;
 
     if($div == NULL) return;
