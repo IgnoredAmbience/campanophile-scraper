@@ -84,6 +84,22 @@ class Database {
     return $this->raw_fetch_all("$field = '$value'", $class);
   }
 
+  public function fetch_column($class, $field, $where = '') {
+    if(!self::_check_class($class))
+      throw new Exception('Invalid class');
+
+    if($where) $where = " WHERE $where";
+
+    $table = self::_class_to_table($class);
+    $result = $this->raw_query("SELECT $field FROM $table $where;");
+    $results = array();
+    $numrows = mysql_num_rows($result);
+    for($row = 0; $row < $numrows; $row++) {
+      $results[] = mysql_result($result, $row);
+    }
+    return $results;
+  }
+
   public function insert($object) {
     $data = get_object_vars($object); // public context
     unset($data[$object->_pk()]); // (auto-increments)

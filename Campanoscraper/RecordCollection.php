@@ -36,10 +36,25 @@ class RecordCollection implements Iterator {
     if(is_array($callback) && $callback[0] == '$obj')
       $callback[0] =& $obj;
 
-    foreach($this as $obj)
+    $idx = array_search('$obj', $params);
+    if($idx !== false)
+      $params[$idx] =& $obj;
+
+
+    foreach($this as $obj) {
       if(call_user_func_array($callback, $params))
         $return->add($obj, true);
+    }
 
+    return $return;
+  }
+
+  function extract($field) {
+    // Extracts a field from all records to an array
+    $return = array();
+    foreach($this as $record) {
+      $return[] = $record->$field;
+    }
     return $return;
   }
 
