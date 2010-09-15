@@ -61,6 +61,10 @@ class RecordCollection implements Iterator {
     return $this->current;
   }
 
+  function fetch($idx) {
+    return $this->current($idx);
+  }
+
   // Iterator
   function current() {
     return current($this->current);
