@@ -251,7 +251,7 @@ class Campanophile {
         // Method
         $p->apply_array($this->parse_method($cell->textContent));
 
-        $perfs->add($p);
+        $perfs->add($p, true);
       } else {
         // We have no idea what sort of row it is
       }
@@ -285,7 +285,7 @@ class Campanophile {
       $matches = $this->parse_method($node->lastChild->textContent);
       $p->apply_array($matches);
 
-      $performances->add($p);
+      $performances->add($p, true);
     }
 
     return $performances;
@@ -381,7 +381,7 @@ class Campanophile {
     // Get Ringers
     while($div->nodeName == 'span') {
       $perf->ringer_performances->add(new RingerPerformance($div->nextSibling->textContent,
-        $perf->ringer_performances->size() + 1));
+        $perf->ringer_performances->size() + 1), true);
       $this->advptr($div);
       $this->advptr($div);
     }
