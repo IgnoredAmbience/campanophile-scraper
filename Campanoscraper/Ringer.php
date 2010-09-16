@@ -83,7 +83,7 @@ class Ringer extends DatabaseRecord {
       } else {
         // The database would appear to return records by strength of match to
         // the regex, so most plausible match will be set here
-        $match = $ringers->fetch(0);
+        $match = $ringers->rewind();
 
         // Update middle names if not present in db
         if(!$match->middle_names && $parsed->middle_names) {

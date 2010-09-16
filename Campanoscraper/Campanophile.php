@@ -109,10 +109,10 @@ class Campanophile {
     $params += $defaults;
     
     $results = $result = $this->search($params);
-    while(count($result) == 100) {
-      $params['FinalDate'] = $this->reverse_date(end($result)->date);
+    while($result->size() == 100) {
+      $params['FinalDate'] = $this->reverse_date($result->end()->date);
       $result = $this->search($params);
-      $results += $result;
+      $results->merge($result, TRUE);
     }
     return $results;
   }
@@ -251,7 +251,7 @@ class Campanophile {
         // Method
         $p->apply_array($this->parse_method($cell->textContent));
 
-        $perfs->add($p, true);
+        $perfs->add($p, $p->campano_id);
       } else {
         // We have no idea what sort of row it is
       }
@@ -285,7 +285,7 @@ class Campanophile {
       $matches = $this->parse_method($node->lastChild->textContent);
       $p->apply_array($matches);
 
-      $performances->add($p, true);
+      $performances->add($p, $p->campano_id);
     }
 
     return $performances;
@@ -381,7 +381,7 @@ class Campanophile {
     // Get Ringers
     while($div->nodeName == 'span') {
       $perf->ringer_performances->add(new RingerPerformance($div->nextSibling->textContent,
-        $perf->ringer_performances->size() + 1), true);
+        $perf->ringer_performances->size() + 1));
       $this->advptr($div);
       $this->advptr($div);
     }

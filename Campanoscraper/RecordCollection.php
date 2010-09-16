@@ -1,22 +1,53 @@
 <?php
 class RecordCollection implements Iterator {
-  private $original = array();
+  private $removed = array();
   private $current = array();
 
   function __construct($initial = array()) {
-    $this->add_all($initial, true);
+    $this->add_all($initial, TRUE);
   }
 
-  function add($item, $original = false) {
-    if(!in_array($item, $this->current))
+  function add($item, $key = NULL) {
+    $removed_key = array_search($item, $this->removed);
+    if($removed_key !== FALSE) 
+      unset($this->removed[$removed_key]);
+    if($key !== NULL) {
+      $this->current[$key] = $item;
+    } else {
       $this->current[] = $item;
-    if($original && !in_array($item, $this->original))
-      $this->original[] = $item;
+    }
   }
 
-  function add_all($array, $original = false) {
-    foreach($array as $item) {
-      $this->add($item, $original);
+  function add_all($items, $use_keys = FALSE) {
+    foreach($items as $key => $item) {
+      if($use_keys) {
+        $this->add($item, $key);
+      } else {
+        $this->add($item);
+      }
+    }
+  }
+
+  function merge(RecordCollection $with, $use_keys = FALSE) {
+    $this->add_all($with->to_array(), $use_keys);
+  }
+
+  function remove_item($item) {
+    $key = array_search($item, $this->current);
+    if($key !== FALSE) {
+      return $this->remove_key($key);
+    } else {
+      return FALSE;
+    }
+  }
+
+  function remove_key($key) {
+    if(isset($this->current[$key])) {
+      $this->removed[$key] = $this->current[$key];
+      unset($this->current[$key]);
+      return TRUE;
+    } else {
+      return FALSE;
     }
   }
 
@@ -65,11 +96,10 @@ class RecordCollection implements Iterator {
   }
 
   function delete_removed() {
-    foreach($this->original as $item) {
-      if(!in_array($item, $this->current))
-        $item->delete();
+    foreach($this->removed as $item) {
+      $item->delete();
     }
-    $this->original = $this->current;
+    $this->removed = array();
   }
 
   function to_array() {
@@ -91,10 +121,14 @@ class RecordCollection implements Iterator {
     next($this->current);
   }
   function rewind() {
-    reset($this->current);
+    return reset($this->current);
   }
   function valid() {
     return key($this->current) !== NULL;
+  }
+  function end() {
+    // Do not use within an iteration, not safe!
+    return end($this->current);
   }
 }
 

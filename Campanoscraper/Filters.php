@@ -8,8 +8,8 @@ class Filters {
     if(!$coll->size()) return $coll;
 
     if(!$key)
-      $key = $coll->fetch(0)->_pk();
-    $class = get_class($coll->fetch(0));
+      $key = $coll->rewind()->_pk();
+    $class = get_class($coll->rewind());
     $ids = implode(',', $coll->extract($key));
     $db_ids = $db->fetch_column($class, $key, "$key in ($ids)");
 
