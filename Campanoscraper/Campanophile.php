@@ -390,17 +390,17 @@ class Campanophile {
     $perf->footnote = trim($this->dombr2nl($div));
   }
 
-  private function parse_date($str) {
+  function parse_date($str) {
     // Parses date and returns in form YYYY/MM/DD
     return date('Y/m/d', strtotime($str));
   }
 
-  private function reverse_date($str) {
+  function reverse_date($str) {
     // Converts a date from YYYY/MM/DD to DD/MM/YYYY and vice versa
     return implode('/', array_reverse(explode('/', $str)));
   }
 
-  private function parse_location($str) {
+  function parse_location($str) {
     // String of form "Location (Dedication), County"
     // Returns array containing keys of 'location', 'dedication' and 'county'
     preg_match(
@@ -409,16 +409,16 @@ class Campanophile {
     return $matches + array('location' => '', 'dedication' => '', 'county' => '');
   }
 
-  private function parse_method($str) { 
+  function parse_method($str) { 
     // 1234 Funny Principle Major
     preg_match('/(?P<changes>\d+) (?P<method>.*)/', $str, $matches);
     $matches['changes'] = (int) $matches['changes'];
     return $matches;
   }
 
-  private function parse_length($str) {
+  function parse_length($str) {
     $len = 0;
-    preg_match('/(?:(?P<h>\d{1,2})\D*)?(?P<m>\d{1,2})\D*$/', $str, $matches);
+    preg_match('/(?:(?P<h>\d{1,2})\D+)?(?P<m>\d{1,2})\D*$/', $str, $matches);
     if(isset($matches['h']))
       $len += $matches['h'] * 60;
     if(isset($matches['m']))
