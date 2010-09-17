@@ -109,10 +109,10 @@ class Campanophile {
     $params += $defaults;
     
     $results = $result = $this->search($params);
-    while(count($result) == 100) {
-      $params['FinalDate'] = $this->reverse_date(end($result)->date);
+    while($result->size() == 100) {
+      $params['FinalDate'] = $this->reverse_date($result->end()->date);
       $result = $this->search($params);
-      $results += $result;
+      $results->merge($result, TRUE);
     }
     return $results;
   }
@@ -251,7 +251,7 @@ class Campanophile {
         // Method
         $p->apply_array($this->parse_method($cell->textContent));
 
-        $perfs->add($p, true);
+        $perfs->add($p, $p->campano_id);
       } else {
         // We have no idea what sort of row it is
       }
@@ -285,7 +285,7 @@ class Campanophile {
       $matches = $this->parse_method($node->lastChild->textContent);
       $p->apply_array($matches);
 
-      $performances->add($p, true);
+      $performances->add($p, $p->campano_id);
     }
 
     return $performances;
@@ -326,7 +326,7 @@ class Campanophile {
     $this->advptr($div);
     
     // Dedication
-    if(!preg_match('/^(Mon|Tues|Wednes|Thurs|Fri|Sat|Sun)day,/', $div->textContent)) {
+    if(!preg_match('/^(Mon|Tues|Wednes|Thurs|Fri|Satur|Sun)day,/', $div->textContent)) {
       $perf->dedication = $div->textContent;
       $this->advptr($div);
     }
@@ -381,7 +381,7 @@ class Campanophile {
     // Get Ringers
     while($div->nodeName == 'span') {
       $perf->ringer_performances->add(new RingerPerformance($div->nextSibling->textContent,
-        $perf->ringer_performances->size() + 1), true);
+        $perf->ringer_performances->size() + 1));
       $this->advptr($div);
       $this->advptr($div);
     }
@@ -390,17 +390,17 @@ class Campanophile {
     $perf->footnote = trim($this->dombr2nl($div));
   }
 
-  private function parse_date($str) {
+  function parse_date($str) {
     // Parses date and returns in form YYYY/MM/DD
     return date('Y/m/d', strtotime($str));
   }
 
-  private function reverse_date($str) {
+  function reverse_date($str) {
     // Converts a date from YYYY/MM/DD to DD/MM/YYYY and vice versa
     return implode('/', array_reverse(explode('/', $str)));
   }
 
-  private function parse_location($str) {
+  function parse_location($str) {
     // String of form "Location (Dedication), County"
     // Returns array containing keys of 'location', 'dedication' and 'county'
     preg_match(
@@ -409,16 +409,16 @@ class Campanophile {
     return $matches + array('location' => '', 'dedication' => '', 'county' => '');
   }
 
-  private function parse_method($str) { 
+  function parse_method($str) { 
     // 1234 Funny Principle Major
     preg_match('/(?P<changes>\d+) (?P<method>.*)/', $str, $matches);
     $matches['changes'] = (int) $matches['changes'];
     return $matches;
   }
 
-  private function parse_length($str) {
+  function parse_length($str) {
     $len = 0;
-    preg_match('/(?:(?P<h>\d{1,2})\D*)?(?P<m>\d{1,2})\D*$/', $str, $matches);
+    preg_match('/(?:(?P<h>\d{1,2})\D+)?(?P<m>\d{1,2})\D*$/', $str, $matches);
     if(isset($matches['h']))
       $len += $matches['h'] * 60;
     if(isset($matches['m']))

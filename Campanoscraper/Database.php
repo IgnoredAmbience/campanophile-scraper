@@ -45,7 +45,7 @@ class Database {
 
     while($object = mysql_fetch_object($result, $class)) {
       $object->post_db_fetch($this);
-      $objects->add($object, true);
+      $objects->add($object);
     }
 
     return $objects;
