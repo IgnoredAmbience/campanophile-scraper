@@ -326,7 +326,7 @@ class Campanophile {
     $this->advptr($div);
     
     // Dedication
-    if(!preg_match('/^(Mon|Tues|Wednes|Thurs|Fri|Sat|Sun)day,/', $div->textContent)) {
+    if(!preg_match('/^(Mon|Tues|Wednes|Thurs|Fri|Satur|Sun)day,/', $div->textContent)) {
       $perf->dedication = $div->textContent;
       $this->advptr($div);
     }
