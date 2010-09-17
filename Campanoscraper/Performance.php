@@ -46,4 +46,8 @@ class Performance extends DatabaseRecord {
                        ->filter(array('$obj', 'matches_name'), array($ringer))
                        ->size();
   }
+
+  public function to_string() {
+    return "#$this->campano_id $this->date $this->location $this->changes $this->method";
+  }
 }
