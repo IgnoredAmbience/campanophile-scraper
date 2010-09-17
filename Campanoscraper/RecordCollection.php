@@ -74,7 +74,7 @@ class RecordCollection implements Iterator {
 
     foreach($this as $obj) {
       if(call_user_func_array($callback, $params))
-        $return->add($obj, true);
+        $return->add($obj);
     }
 
     return $return;
